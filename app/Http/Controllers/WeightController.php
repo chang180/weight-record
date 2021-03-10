@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Auth;
 use App\Models\weight;
 use Illuminate\Http\Request;
 
@@ -14,8 +15,12 @@ class WeightController extends Controller
      */
     public function index()
     {
-        //
-        return view('record');
+        // dd(Auth::user()->id);
+        $user_id = Auth::user()->id;
+        $weights = weight::where('user',$user_id)
+        ->get();
+        dd($weights);
+        return view('record',$weights);
     }
 
     /**
@@ -39,10 +44,10 @@ class WeightController extends Controller
         //
         // dd($request->input(),$_POST);
         $weight = new weight;
-            $weight->record_at = $request->input('record_at');
-            $weight->weight = $request->input('weight');
-            $weight->user = $request->input('user');
-            $weight->save();
+        $weight->record_at = $request->input('record_at');
+        $weight->weight = $request->input('weight');
+        $weight->user = $request->input('user');
+        $weight->save();
 
         return redirect('/dashboard');
     }
