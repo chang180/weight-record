@@ -15,6 +15,7 @@ class WeightController extends Controller
     public function index()
     {
         //
+        return view('record');
     }
 
     /**
@@ -36,6 +37,14 @@ class WeightController extends Controller
     public function store(Request $request)
     {
         //
+        // dd($request->input(),$_POST);
+        $weight = new weight;
+            $weight->record_at = $request->input('record_at');
+            $weight->weight = $request->input('weight');
+            $weight->user = $request->input('user');
+            $weight->save();
+
+        return redirect('/dashboard');
     }
 
     /**

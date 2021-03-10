@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\WeightController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,8 +22,8 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth'])->name('dashboard');
 
-Route::get('/record', function () {
-    return view('record');
-})->middleware(['auth'])->name('record');
+Route::get('/record', [WeightController::class,'index'])->middleware(['auth'])->name('record');
+
+Route::post('/record', [WeightController::class,'store'])->middleware(['auth'])->name('record');
 
 require __DIR__.'/auth.php';
