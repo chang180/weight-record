@@ -419,8 +419,8 @@
 
         <form method="POST" action="{{ route('register') }}">
             @csrf
-        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8 text-xl bg-white">
-            請登入以做記錄
+        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8 text-5xl bg-white">
+            請登入或註册以做記錄
         </div>
     </form>
     </div>
