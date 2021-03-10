@@ -18,9 +18,10 @@ class WeightController extends Controller
         // dd(Auth::user()->id);
         $user_id = Auth::user()->id;
         $weights = weight::where('user',$user_id)
+        ->orderBy('record_at','DESC')
         ->get();
-        dd($weights);
-        return view('record',$weights);
+        // dd($weights);
+        return view('record',['weights'=>$weights]);
     }
 
     /**
