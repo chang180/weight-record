@@ -27,7 +27,7 @@
             
                         <x-input id="weight" class="block mt-1 w-full" type="text" name="weight" :value="old('weight')" required />
                     </div>
-                    <x-button class="ml-4">
+                    <x-button class="ml-4 mt-2">
                         {{ __('Submit') }}
                     </x-button>
                 </form>
