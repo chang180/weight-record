@@ -17,11 +17,11 @@ class WeightController extends Controller
     {
         // dd(Auth::user()->id);
         $user_id = Auth::user()->id;
-        $weights = weight::where('user',$user_id)
-        ->orderBy('record_at','DESC')
-        ->get();
+        $weights = weight::where('user', $user_id)
+            ->orderBy('record_at', 'DESC')
+            ->get();
         // dd($weights);
-        return view('record',['weights'=>$weights]);
+        return view('record', ['weights' => $weights]);
     }
 
     /**
@@ -70,9 +70,15 @@ class WeightController extends Controller
      * @param  \App\Models\weight  $weight
      * @return \Illuminate\Http\Response
      */
-    public function edit(weight $weight)
+    public function edit(Request $request, $id)
     {
-        //
+        // dd($request);
+        $weight = weight::find($id);
+        $weight->record_at = $request->input('record_at');
+        $weight->weight = $request->input('weight');
+        $weight->user = $request->input('user');
+        $weight->save();
+        return redirect('/record');
     }
 
     /**
@@ -93,8 +99,9 @@ class WeightController extends Controller
      * @param  \App\Models\weight  $weight
      * @return \Illuminate\Http\Response
      */
-    public function destroy(weight $weight)
+    public function delete($id)
     {
-        //
+        weight::destroy($id);
+        return redirect('/record');
     }
 }
