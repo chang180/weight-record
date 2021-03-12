@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Auth;
-use App\Models\Weight;
+use App\Models\weight;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -18,7 +18,7 @@ class WeightController extends Controller
     {
         // dd(Auth::user()->id);
         $user_id = Auth::user()->id;
-        $weights = Weight::where('user', $user_id)
+        $weights = weight::where('user', $user_id)
             ->orderBy('record_at', 'DESC')
             ->paginate(15);
         // dd($weights);
@@ -45,7 +45,7 @@ class WeightController extends Controller
     {
         //
         // dd($request->input(),$_POST);
-        $weight = new Weight;
+        $weight = new weight;
         $weight->record_at = $request->input('record_at');
         $weight->weight = $request->input('weight');
         $weight->user = $request->input('user');
@@ -57,13 +57,13 @@ class WeightController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Weight  $weight
+     * @param  \App\Models\weight  $weight
      * @return \Illuminate\Http\Response
      */
-    public function show(Weight $weight)
+    public function show(weight $weight)
     {
         $user_id = Auth::user()->id;
-        $weights = Weight::where('user', $user_id)
+        $weights = weight::where('user', $user_id)
             ->orderBy('record_at', 'ASC')
             ->get();
         return view('chart', ['weights' => $weights]);
@@ -72,13 +72,13 @@ class WeightController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Weight  $weight
+     * @param  \App\Models\weight  $weight
      * @return \Illuminate\Http\Response
      */
     public function edit(Request $request, $id)
     {
         // dd($request);
-        $weight = Weight::find($id);
+        $weight = weight::find($id);
         $weight->record_at = $request->input('record_at');
         $weight->weight = $request->input('weight');
         $weight->user = $request->input('user');
@@ -90,7 +90,7 @@ class WeightController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Weight  $weight
+     * @param  \App\Models\weight  $weight
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, weight $weight)
@@ -101,12 +101,12 @@ class WeightController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Weight  $weight
+     * @param  \App\Models\weight  $weight
      * @return \Illuminate\Http\Response
      */
     public function delete($id)
     {
-        Weight::destroy($id);
+        weight::destroy($id);
         return redirect('/record');
     }
 }
