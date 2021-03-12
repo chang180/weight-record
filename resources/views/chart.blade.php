@@ -34,7 +34,7 @@
     // console.log(label,data)
     var ctx = document.getElementById('myChart');
     var myChart = new Chart(ctx, {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: label,
             datasets: [{
