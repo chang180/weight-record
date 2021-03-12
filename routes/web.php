@@ -30,4 +30,6 @@ Route::post('/edit/{id}', [WeightController::class,'edit'])->middleware(['auth']
 
 Route::get('/delete/{id}', [WeightController::class,'delete'])->middleware(['auth'])->name('delete');
 
+Route::get('/chart', [WeightController::class,'show'])->middleware(['auth'])->name('chart');
+
 require __DIR__.'/auth.php';

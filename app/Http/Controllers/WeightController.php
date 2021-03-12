@@ -62,7 +62,11 @@ class WeightController extends Controller
      */
     public function show(weight $weight)
     {
-        //
+        $user_id = Auth::user()->id;
+        $weights = weight::where('user', $user_id)
+            ->orderBy('record_at', 'ASC')
+            ->get();
+        return view('chart', ['weights' => $weights]);
     }
 
     /**
