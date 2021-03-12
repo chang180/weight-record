@@ -425,7 +425,11 @@
 					<p class="text-white font-extrabold text-3xl md:text-5xl">
 						簡易體重記錄器
 					</p>
-					<p class="text-xl md:text-2xl text-gray-500">請登入或註册以開始作記錄</p>
+					<p class="text-xl md:text-2xl text-gray-500">請
+                        <a href="{{ route('login') }}">登入</a>
+                        或
+                        <a href="{{ route('register') }}">註册</a>
+                        以開始作記錄</p>
 			</div>
         </div>
     </form>
