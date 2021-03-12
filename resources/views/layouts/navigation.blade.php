@@ -51,7 +51,7 @@
                             <x-dropdown-link :href="route('logout')"
                                     onclick="event.preventDefault();
                                                 this.closest('form').submit();">
-                                {{ __('Log out') }}
+                                {{ __('登出') }}
                             </x-dropdown-link>
                         </form>
                     </x-slot>
@@ -101,7 +101,7 @@
                     <x-responsive-nav-link :href="route('logout')"
                             onclick="event.preventDefault();
                                         this.closest('form').submit();">
-                        {{ __('Log out') }}
+                        {{ __('登出') }}
                     </x-responsive-nav-link>
                 </form>
             </div>
