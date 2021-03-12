@@ -420,7 +420,7 @@
         <form method="POST" action="{{ route('register') }}">
             @csrf
         <div class="max-w-6xl mx-auto sm:px-6 lg:px-8 text-5xl bg-white">
-            請登入或註册以做記錄
+            請登入或註册以作記錄
         </div>
     </form>
     </div>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Auth;
 use App\Models\weight;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class WeightController extends Controller
 {
@@ -19,7 +20,7 @@ class WeightController extends Controller
         $user_id = Auth::user()->id;
         $weights = weight::where('user', $user_id)
             ->orderBy('record_at', 'DESC')
-            ->get();
+            ->paginate(15);
         // dd($weights);
         return view('record', ['weights' => $weights]);
     }

@@ -9,7 +9,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
-                    {{-- {{ dd(count($weights)) }} --}}
+                    {{-- {{ dd($weights) }} --}}
                     @if (count($weights)!=0)
                         @foreach ($weights as $item)
                             {{-- {{ $item->record_at . ',' . $item->weight }} --}}
@@ -22,6 +22,7 @@
                                 <a href="/delete/{{ $item->id }}" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">刪除</a>
                             </form>
                         @endforeach
+                        {{ $weights->links() }}
                     @else
                         <h1>目前還沒有記錄</h1>
                     @endif
