@@ -402,7 +402,7 @@
 
 <body class="antialiased">
     <div
-        class="relative flex items-top justify-center min-h-screen bg-gray-100 dark:bg-gray-900 sm:items-center sm:pt-0">
+        class="relative flex items-top justify-center min-h-screen bg-gray-100 dark:bg-gray-700 sm:items-center sm:pt-0">
         @if (Route::has('login'))
             <div class="hidden fixed top-0 right-0 px-6 py-4 sm:block">
                 @auth
@@ -419,8 +419,14 @@
 
         <form method="POST" action="{{ route('register') }}">
             @csrf
-        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8 text-5xl bg-white">
-            請登入或註册以作記錄
+        <div class="w-full m-0 p-0 bg-cover bg-bottom" style="background:'#fff'; height: 60vh; max-height:460px;">
+            <div class="container max-w-4xl mx-auto pt-16 md:pt-32 text-center break-normal">
+				<!--Title-->
+					<p class="text-white font-extrabold text-3xl md:text-5xl">
+						簡易體重記錄器
+					</p>
+					<p class="text-xl md:text-2xl text-gray-500">請登入或註册以開始作記錄</p>
+			</div>
         </div>
     </form>
     </div>
