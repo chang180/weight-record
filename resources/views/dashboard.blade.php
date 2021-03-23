@@ -18,14 +18,14 @@
                     <div>
                         <x-label for="record_at" :value="__('記錄日期')" />
             
-                        <x-input id="record_at" class="block mt-1 w-full" type="date" name="record_at" :value="old('record_at')" required
+                        <x-input id="record_at" class="block mt-1 w-full" type="text" name="record_at" :value="old('記錄日期')??date('Y/m/d')" required
                             autofocus />
                     </div>
                     {{-- 測試輸入體重 --}}
                     <div class="mt-4">
                         <x-label for="weight" :value="__('體重')" />
             
-                        <x-input id="weight" class="block mt-1 w-full" type="text" name="weight" :value="old('weight')" required />
+                        <x-input id="weight" class="block mt-1 w-full" type="text" name="weight" :value="old('體重')" required />
                     </div>
                     {{-- 送出記錄者id --}}
 <input type="hidden" name="user" value={{ Auth::user()->id }}>
