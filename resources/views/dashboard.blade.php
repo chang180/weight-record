@@ -18,8 +18,10 @@
                     <div>
                         <x-label for="record_at" :value="__('記錄日期')" />
             
-                        <x-input id="record_at" class="block mt-1 w-full" type="text" name="record_at" :value="old('記錄日期')??date('Y/m/d')" required
+                        <x-input id="record_at" class="block mt-1 w-full" type="date" name="record_at" value="{{date('Y-m-d')}}" required
                             autofocus />
+                        {{-- <x-input id="record_at" class="block mt-1 w-full" type="text" name="record_at" :value="old('記錄日期')??date('Y/m/d')" required
+                            autofocus /> --}}
                     </div>
                     {{-- 測試輸入體重 --}}
                     <div class="mt-4">
