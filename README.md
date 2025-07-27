@@ -1,62 +1,146 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# 體重記錄追蹤系統
 
 <p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo">
 </p>
 
-## About Laravel
+## 專案概述
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+體重記錄追蹤系統是一個簡潔實用的個人健康管理工具，使用者可以每日記錄體重數據，系統會自動生成統計圖表，幫助使用者直觀地了解體重變化趨勢。
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 技術亮點：Laravel 8 到 Laravel 12 的成功升級
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+本專案最大的技術亮點是成功從 **Laravel 8** 升級到 **Laravel 12**，展示了對 Laravel 框架深入理解和技術維護能力。升級過程涉及多方面的調整和優化：
 
-## Learning Laravel
+- 更新核心依賴和配置
+- 適應新版本的語法和架構變化
+- 遷移前端資源管理從 Laravel Mix 到 Vite
+- 優化程式碼以符合 PHP 8.2 標準
+- 修改中介層和路由定義以適應新版本
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 功能特色
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- **用戶認證系統**：安全的註冊和登入功能
+- **體重記錄**：簡單直觀的體重數據輸入界面
+- **數據管理**：方便地查看、編輯和刪除歷史記錄
+- **視覺化圖表**：基於 Chart.js 的體重變化趨勢圖
+- **響應式設計**：適配各種設備尺寸的界面
 
-## Laravel Sponsors
+## 技術棧
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+### 後端
+- **PHP 8.2**
+- **Laravel 12**：最新版本的 Laravel 框架
+- **MySQL**：數據存儲
 
-### Premium Partners
+### 前端
+- **Blade 模板引擎**
+- **Tailwind CSS**：現代化的 UI 設計
+- **Chart.js**：數據視覺化
+- **Vite**：前端資源打包工具
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/)**
-- **[OP.GG](https://op.gg)**
+## 安裝與設置
 
-## Contributing
+### 系統要求
+- PHP >= 8.2
+- Composer
+- Node.js 和 npm
+- MySQL 或其他 Laravel 支持的數據庫
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 安裝步驟
 
-## Code of Conduct
+1. 克隆存儲庫
+```bash
+git clone https://github.com/yourusername/weight-tracker.git
+cd weight-tracker
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+2. 安裝 PHP 依賴
+```bash
+composer install
+```
 
-## Security Vulnerabilities
+3. 安裝前端依賴
+```bash
+npm install
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+4. 配置環境
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-## License
+5. 設置數據庫
+   - 在 `.env` 文件中配置數據庫連接
+   - 運行遷移
+```bash
+php artisan migrate
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+6. 編譯前端資源
+```bash
+npm run build
+```
+
+7. 啟動開發服務器
+```bash
+php artisan serve
+```
+
+## 使用指南
+
+1. 註冊/登入系統
+2. 在主頁面輸入當天的體重數據
+3. 查看「所有記錄」頁面管理歷史數據
+4. 在「統計圖」頁面查看體重變化趨勢
+
+## 專案亮點：Laravel 版本升級
+
+### 升級概述
+
+本專案展示了從 Laravel 8 到 Laravel 12 的完整升級過程，涉及以下主要方面：
+
+1. **核心依賴更新**
+   - 更新 PHP 版本要求為 ^8.2
+   - 更新 Laravel 框架版本為 ^12.0
+   - 更新相關套件和依賴
+
+2. **架構調整**
+   - 更新中介層結構和命名
+   - 調整路由服務提供者
+   - 更新異常處理機制
+
+3. **前端工具鏈遷移**
+   - 從 Laravel Mix 遷移到 Vite
+   - 更新 JavaScript 模組系統
+   - 優化 Tailwind CSS 配置
+
+4. **程式碼現代化**
+   - 添加型別提示
+   - 使用 PHP 8 的新特性
+   - 優化模型定義
+
+### 升級挑戰與解決方案
+
+升級過程中遇到的主要挑戰包括：
+
+1. **中介層變更**：Laravel 12 中的中介層結構有所調整，需要更新 `Kernel.php` 文件。
+2. **路由定義**：適應新版本的路由定義方式。
+3. **認證系統**：更新與 Laravel 12 兼容的認證機制。
+4. **前端資源管理**：從 Mix 遷移到 Vite 需要重新配置資源編譯流程。
+
+這些挑戰通過仔細閱讀官方文檔、逐步測試和迭代優化得到了解決，確保系統在新版本框架下穩定運行。
+
+## 學習心得
+
+通過這個專案的開發和升級過程，我獲得了以下寶貴經驗：
+
+1. 深入理解 Laravel 框架的核心機制和演進方向
+2. 掌握大型框架版本升級的系統性方法和最佳實踐
+3. 增強對前端和後端技術整合的理解
+4. 提升代碼質量和維護性的實踐經驗
+
+## 授權
+
+本專案採用 [MIT 授權](https://opensource.org/licenses/MIT)。
