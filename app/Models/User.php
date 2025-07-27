@@ -41,4 +41,12 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    /**
+     * 獲取用戶的所有體重記錄
+     */
+    public function weights()
+    {
+        return $this->hasMany(Weight::class, 'user', 'id');
+    }
 }
