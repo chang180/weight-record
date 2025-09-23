@@ -4,9 +4,6 @@
             🏥 健康指標分析
         </h2>
     </x-slot>
-
-    <div class="py-10 bg-gray-50 min-h-screen">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             @if(!isset($hasData) || $hasData)
                 <!-- BMI 指標卡片 -->
                 <div class="bg-white rounded-lg shadow-md p-8 mb-8">
