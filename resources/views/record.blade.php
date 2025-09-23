@@ -41,9 +41,17 @@
             <div class="bg-white shadow-lg rounded-xl overflow-hidden">
                 <div class="px-6 py-4 bg-indigo-600 flex justify-between items-center">
                     <h3 class="text-lg font-bold text-white">所有體重記錄</h3>
-                    <a href="{{ route('dashboard') }}" class="px-4 py-2 bg-white text-indigo-600 font-bold rounded-lg shadow hover:bg-gray-100 transition duration-300">
-                        {{ __('新增記錄') }}
-                    </a>
+                    <div class="flex space-x-2">
+                        <a href="{{ route('weights.export.csv') }}" class="px-4 py-2 bg-green-600 text-white font-bold rounded-lg shadow hover:bg-green-700 transition duration-300">
+                            📊 CSV
+                        </a>
+                        <a href="{{ route('weights.export.pdf') }}" class="px-4 py-2 bg-red-600 text-white font-bold rounded-lg shadow hover:bg-red-700 transition duration-300">
+                            📄 PDF
+                        </a>
+                        <a href="{{ route('dashboard') }}" class="px-4 py-2 bg-white text-indigo-600 font-bold rounded-lg shadow hover:bg-gray-100 transition duration-300">
+                            {{ __('新增記錄') }}
+                        </a>
+                    </div>
                 </div>
                 <div class="p-6">
                     @if (session('success'))

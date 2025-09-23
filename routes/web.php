@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WeightController;
-
+use App\Http\Controllers\WeightGoalController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -40,6 +40,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/record', [WeightController::class, 'index'])->name('record');
     Route::get('/chart', [WeightController::class, 'show'])->name('chart');
     Route::get('/api/weights/latest', [WeightController::class, 'latest'])->name('weights.latest');
+    Route::get('/weights/export/csv', [WeightController::class, 'exportCsv'])->name('weights.export.csv');
+    Route::get('/weights/export/pdf', [WeightController::class, 'exportPdf'])->name('weights.export.pdf');
+    Route::get('/analysis/trend', [WeightController::class, 'trendAnalysis'])->name('analysis.trend');
+    Route::get('/analysis/health', [WeightController::class, 'healthMetrics'])->name('analysis.health');
+    
+    // 體重目標路由
+    Route::resource('goals', WeightGoalController::class);
+    Route::patch('/goals/{goal}/activate', [WeightGoalController::class, 'activate'])->name('goals.activate');
 });
 
 require __DIR__.'/auth.php';

@@ -58,6 +58,55 @@
                 </div>
             </div>
 
+            <!-- 體重目標設定 -->
+            @php
+                $activeGoal = auth()->user()->activeWeightGoal;
+            @endphp
+            
+            @if($activeGoal)
+                <div class="mt-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-purple-800">🎯 當前目標</h3>
+                        <a href="{{ route('goals.index') }}" class="text-sm text-purple-600 hover:text-purple-800 font-medium">管理目標</a>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-purple-600">{{ $activeGoal->target_weight }} 公斤</div>
+                            <div class="text-sm text-purple-500">目標體重</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-purple-600">{{ $activeGoal->target_date->format('Y/m/d') }}</div>
+                            <div class="text-sm text-purple-500">目標日期</div>
+                        </div>
+                        <div class="text-center">
+                            @php
+                                $currentWeight = auth()->user()->weights()->latest('record_at')->first()?->weight ?? 0;
+                                $progress = $currentWeight > 0 ? min(100, max(0, (abs($currentWeight - $activeGoal->target_weight) / max(abs($currentWeight - $activeGoal->target_weight), 1)) * 100)) : 0;
+                            @endphp
+                            <div class="text-2xl font-bold text-purple-600">{{ round($progress) }}%</div>
+                            <div class="text-sm text-purple-500">進度</div>
+                        </div>
+                    </div>
+                    @if($activeGoal->description)
+                        <div class="mt-4 p-3 bg-white rounded-lg">
+                            <p class="text-sm text-gray-600">{{ $activeGoal->description }}</p>
+                        </div>
+                    @endif
+                </div>
+            @else
+                <div class="mt-6 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl p-6 border border-indigo-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-indigo-800">🎯 設定體重目標</h3>
+                            <p class="text-sm text-indigo-600 mt-1">設定目標可以幫助您更好地管理體重</p>
+                        </div>
+                        <a href="{{ route('goals.create') }}" class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition duration-300">
+                            設定目標
+                        </a>
+                    </div>
+                </div>
+            @endif
+
             <!-- 健康小提示 -->
             <div class="mt-6 bg-blue-50 rounded-xl p-4 border border-blue-200">
                 <div class="flex">

@@ -48,6 +48,22 @@ class User extends Authenticatable
      */
     public function weights()
     {
-        return $this->hasMany(Weight::class, 'user', 'id');
+        return $this->hasMany(Weight::class);
+    }
+
+    /**
+     * 獲取用戶的所有體重目標
+     */
+    public function weightGoals()
+    {
+        return $this->hasMany(WeightGoal::class);
+    }
+
+    /**
+     * 獲取用戶的活躍體重目標
+     */
+    public function activeWeightGoal()
+    {
+        return $this->hasOne(WeightGoal::class)->where('is_active', true);
     }
 }
