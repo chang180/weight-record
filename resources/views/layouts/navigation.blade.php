@@ -100,6 +100,9 @@
             <a href="{{ route('analysis.health') }}" class="block px-3 py-2 rounded-md {{ request()->routeIs('analysis.health') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600' }} font-medium">
                 {{ __('健康指標') }}
             </a>
+            <a href="{{ route('profile.edit') }}" class="block px-3 py-2 rounded-md {{ request()->routeIs('profile.edit') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600' }} font-medium">
+                {{ __('個人資料') }}
+            </a>
         </div>
         <div class="pt-4 pb-3 border-t border-gray-200">
             <div class="px-4 flex items-center">

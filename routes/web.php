@@ -48,6 +48,10 @@ Route::middleware(['auth'])->group(function () {
     // 體重目標路由
     Route::resource('goals', WeightGoalController::class);
     Route::patch('/goals/{goal}/activate', [WeightGoalController::class, 'activate'])->name('goals.activate');
+    
+    // 個人資料路由
+    Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
 });
 
 require __DIR__.'/auth.php';

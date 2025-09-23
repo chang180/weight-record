@@ -438,8 +438,8 @@ class WeightController extends Controller
      */
     private function calculateHealthMetrics(float $weight): array
     {
-        // 假設身高為 170cm（實際應用中應該從用戶資料獲取）
-        $height = 170; // cm
+        // 從用戶資料獲取身高，如果未設定則使用預設值
+        $height = Auth::user()->height ?? 170; // cm
         $heightInMeters = $height / 100;
         
         // 計算 BMI
