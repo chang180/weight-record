@@ -261,18 +261,43 @@ class WeightController extends Controller
      */
     public function trendAnalysis(Request $request): View
     {
-        $user_id = Auth::id();
-        $days = $request->get('days', 30); // 預設分析最近30天
-        
-        $weights = Weight::where('user_id', $user_id)
-            ->where('record_at', '>=', now()->subDays($days))
-            ->orderBy('record_at', 'asc')
-            ->get();
+        try {
+            $user_id = Auth::id();
+            $days = $request->get('days', 30); // 預設分析最近30天
+            
+            $weights = Weight::where('user_id', $user_id)
+                ->where('record_at', '>=', now()->subDays($days))
+                ->orderBy('record_at', 'asc')
+                ->get();
 
-        // 計算趨勢統計
-        $analysis = $this->calculateTrendAnalysis($weights);
-        
-        return view('analysis.trend', compact('weights', 'analysis', 'days'));
+            // 計算趨勢統計
+            $analysis = $this->calculateTrendAnalysis($weights);
+            
+            return view('analysis.trend', compact('weights', 'analysis', 'days'));
+        } catch (\Exception $e) {
+            // 記錄錯誤並返回錯誤頁面
+            \Log::error('Trend analysis error: ' . $e->getMessage(), [
+                'user_id' => Auth::id(),
+                'days' => $request->get('days', 30),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return view('analysis.trend', [
+                'weights' => collect(),
+                'analysis' => [
+                    'total_records' => 0,
+                    'weight_change' => 0,
+                    'average_weight' => 0,
+                    'trend_direction' => 'stable',
+                    'weekly_change' => 0,
+                    'monthly_change' => 0,
+                    'volatility' => 0,
+                    'consistency_score' => 0,
+                ],
+                'days' => $request->get('days', 30),
+                'error' => '分析過程中發生錯誤，請稍後再試'
+            ]);
+        }
     }
 
     /**
@@ -327,7 +352,14 @@ class WeightController extends Controller
         $volatility = $this->calculateStandardDeviation($weightsArray);
         
         // 計算一致性分數（基於記錄頻率）
-        $totalDays = $weights->count() > 0 ? $weights->first()->record_at->diffInDays($weights->last()->record_at) + 1 : 1;
+        $totalDays = 1;
+        if ($weights->count() > 0) {
+            $firstWeight = $weights->first();
+            $lastWeight = $weights->last();
+            if ($firstWeight && $lastWeight) {
+                $totalDays = $firstWeight->record_at->diffInDays($lastWeight->record_at) + 1;
+            }
+        }
         $consistencyScore = min(100, ($weights->count() / $totalDays) * 100);
         
         return [
