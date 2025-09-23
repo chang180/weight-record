@@ -18,6 +18,19 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// 靜態頁面路由
+Route::get('/privacy', function () {
+    return view('pages.privacy');
+});
+
+Route::get('/terms', function () {
+    return view('pages.terms');
+});
+
+Route::get('/contact', function () {
+    return view('pages.contact');
+});
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
