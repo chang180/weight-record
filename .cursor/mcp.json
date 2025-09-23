@@ -1,0 +1,13 @@
+{
+    "mcpServers": {
+        "herd": {
+            "command": "php",
+            "args": [
+                "C:/Users/chang180/.config/herd/bin/herd-mcp.phar"
+            ],
+            "env": {
+                "SITE_PATH": "D:\\coding\\weight-record"
+            }
+        }
+    }
+}
