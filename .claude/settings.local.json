@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php artisan make:migration:*)",
+      "Bash(php artisan:*)",
+      "Bash(composer require:*)",
+      "Bash(./vendor/bin/php-cs-fixer fix:*)",
+      "Bash(./vendor/bin/phpunit:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(npm run build:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

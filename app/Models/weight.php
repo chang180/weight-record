@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Weight extends Model
 {
@@ -11,32 +12,30 @@ class Weight extends Model
 
     /**
      * 可批量賦值的屬性
-     *
-     * @var array
      */
     protected $fillable = [
-        'user',
+        'user_id',
         'weight',
         'record_at',
         'note'
     ];
 
     /**
-     * 應該被轉換為日期的屬性
-     *
-     * @var array
+     * 屬性轉換
      */
-    protected $dates = [
-        'record_at',
-        'created_at',
-        'updated_at'
-    ];
+    protected function casts(): array
+    {
+        return [
+            'record_at' => 'date',
+            'weight' => 'decimal:1',
+        ];
+    }
 
     /**
      * 獲取擁有此體重記錄的用戶
      */
-    public function user()
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user', 'id');
+        return $this->belongsTo(User::class);
     }
 }
