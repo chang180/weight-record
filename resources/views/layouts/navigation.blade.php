@@ -18,7 +18,7 @@
                             <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                             </svg>
-                            {{ __('輸入記錄') }}
+                            {{ __('新增') }}
                         </span>
                     </a>
                     <a href="{{ route('record') }}" class="px-3 py-2 rounded-md {{ request()->routeIs('record') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600' }} font-medium transition duration-200">
@@ -26,7 +26,7 @@
                             <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                             </svg>
-                            {{ __('記錄列表') }}
+                            {{ __('記錄') }}
                         </span>
                     </a>
                     <a href="{{ route('chart') }}" class="px-3 py-2 rounded-md {{ request()->routeIs('chart') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600' }} font-medium transition duration-200">
@@ -34,7 +34,7 @@
                             <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
                             </svg>
-                            {{ __('統計圖') }}
+                            {{ __('圖表') }}
                         </span>
                     </a>
                     <a href="{{ route('analysis.trend') }}" class="px-3 py-2 rounded-md {{ request()->routeIs('analysis.trend') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600' }} font-medium transition duration-200">
@@ -42,7 +42,7 @@
                             <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                             </svg>
-                            {{ __('趨勢分析') }}
+                            {{ __('趨勢') }}
                         </span>
                     </a>
                     <a href="{{ route('analysis.health') }}" class="px-3 py-2 rounded-md {{ request()->routeIs('analysis.health') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600' }} font-medium transition duration-200">
@@ -50,7 +50,15 @@
                             <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                             </svg>
-                            {{ __('健康指標') }}
+                            {{ __('健康') }}
+                        </span>
+                    </a>
+                    <a href="{{ route('profile.edit') }}" class="px-3 py-2 rounded-md {{ request()->routeIs('profile.edit') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600' }} font-medium transition duration-200">
+                        <span class="flex items-center">
+                            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            {{ __('設定') }}
                         </span>
                     </a>
                 </div>
@@ -86,19 +94,22 @@
     <div class="mobile-menu hidden sm:hidden">
         <div class="px-2 pt-2 pb-3 space-y-1">
             <a href="{{ route('dashboard') }}" class="block px-3 py-2 rounded-md {{ request()->routeIs('dashboard') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600' }} font-medium">
-                {{ __('輸入記錄') }}
+                {{ __('新增') }}
             </a>
             <a href="{{ route('record') }}" class="block px-3 py-2 rounded-md {{ request()->routeIs('record') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600' }} font-medium">
-                {{ __('記錄列表') }}
+                {{ __('記錄') }}
             </a>
             <a href="{{ route('chart') }}" class="block px-3 py-2 rounded-md {{ request()->routeIs('chart') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600' }} font-medium">
-                {{ __('統計圖') }}
+                {{ __('圖表') }}
             </a>
             <a href="{{ route('analysis.trend') }}" class="block px-3 py-2 rounded-md {{ request()->routeIs('analysis.trend') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600' }} font-medium">
-                {{ __('趨勢分析') }}
+                {{ __('趨勢') }}
             </a>
             <a href="{{ route('analysis.health') }}" class="block px-3 py-2 rounded-md {{ request()->routeIs('analysis.health') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600' }} font-medium">
-                {{ __('健康指標') }}
+                {{ __('健康') }}
+            </a>
+            <a href="{{ route('profile.edit') }}" class="block px-3 py-2 rounded-md {{ request()->routeIs('profile.edit') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600' }} font-medium">
+                {{ __('設定') }}
             </a>
         </div>
         <div class="pt-4 pb-3 border-t border-gray-200">
