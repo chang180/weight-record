@@ -18,18 +18,14 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth'])->name('dashboard');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
 
-Route::get('/record', [WeightController::class,'index'])->middleware(['auth'])->name('record');
-
-Route::post('/record', [WeightController::class,'store'])->middleware(['auth'])->name('store');
-
-Route::post('/edit/{id}', [WeightController::class,'edit'])->middleware(['auth'])->name('edit');
-
-Route::get('/delete/{id}', [WeightController::class,'delete'])->middleware(['auth'])->name('delete');
-
-Route::get('/chart', [WeightController::class,'show'])->middleware(['auth'])->name('chart');
+    Route::resource('weights', WeightController::class);
+    Route::get('/record', [WeightController::class, 'index'])->name('record');
+    Route::get('/chart', [WeightController::class, 'show'])->name('chart');
+});
 
 require __DIR__.'/auth.php';

@@ -13,7 +13,23 @@
                     <h3 class="text-lg font-bold text-white">新增體重記錄</h3>
                 </div>
                 <div class="p-6">
-                    <form method="POST" action="{{ route('record') }}" class="space-y-6">
+                    @if (session('success'))
+                        <div class="mb-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if ($errors->any())
+                        <div class="mb-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
+                            <ul class="list-disc list-inside">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <form method="POST" action="{{ route('weights.store') }}" class="space-y-6">
                         @csrf
                         <div>
                             <label for="record_at" class="block text-sm font-semibold text-gray-700 mb-2">{{ __('記錄日期') }}</label>
@@ -32,7 +48,6 @@
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none"
                                 placeholder="可選：記錄當天的飲食、運動或其他情況"></textarea>
                         </div>
-                        <input type="hidden" name="user" value="{{ Auth::user()->id }}">
                         <div class="flex justify-end">
                             <button type="submit"
                                 class="px-6 py-2 bg-indigo-600 text-white font-bold rounded-lg shadow hover:bg-indigo-700 transition duration-300 transform hover:-translate-y-1">
