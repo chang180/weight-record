@@ -1,9 +1,15 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-bold text-2xl text-indigo-700 tracking-tight">
+@extends('layouts.app')
+
+@section('title', '健康指標分析')
+
+@section('content')
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-indigo-700 mb-2">
             🏥 健康指標分析
-        </h2>
-    </x-slot>
+        </h1>
+        <p class="text-gray-600">了解您的健康指標和建議</p>
+    </div>
 
     <div class="py-10 bg-gray-50 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -165,4 +171,5 @@
             @endif
         </div>
     </div>
-</x-app-layout>
+</div>
+@endsection
