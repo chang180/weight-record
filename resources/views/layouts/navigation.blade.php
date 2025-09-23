@@ -53,6 +53,14 @@
                             {{ __('健康指標') }}
                         </span>
                     </a>
+                    <a href="{{ route('profile.edit') }}" class="px-3 py-2 rounded-md {{ request()->routeIs('profile.edit') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600' }} font-medium transition duration-200">
+                        <span class="flex items-center">
+                            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            {{ __('個人資料') }}
+                        </span>
+                    </a>
                 </div>
             </div>
 
