@@ -37,6 +37,22 @@
                             {{ __('統計圖') }}
                         </span>
                     </a>
+                    <a href="{{ route('analysis.trend') }}" class="px-3 py-2 rounded-md {{ request()->routeIs('analysis.trend') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600' }} font-medium transition duration-200">
+                        <span class="flex items-center">
+                            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            {{ __('趨勢分析') }}
+                        </span>
+                    </a>
+                    <a href="{{ route('analysis.health') }}" class="px-3 py-2 rounded-md {{ request()->routeIs('analysis.health') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600' }} font-medium transition duration-200">
+                        <span class="flex items-center">
+                            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                            </svg>
+                            {{ __('健康指標') }}
+                        </span>
+                    </a>
                 </div>
             </div>
 
@@ -77,6 +93,12 @@
             </a>
             <a href="{{ route('chart') }}" class="block px-3 py-2 rounded-md {{ request()->routeIs('chart') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600' }} font-medium">
                 {{ __('統計圖') }}
+            </a>
+            <a href="{{ route('analysis.trend') }}" class="block px-3 py-2 rounded-md {{ request()->routeIs('analysis.trend') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600' }} font-medium">
+                {{ __('趨勢分析') }}
+            </a>
+            <a href="{{ route('analysis.health') }}" class="block px-3 py-2 rounded-md {{ request()->routeIs('analysis.health') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600' }} font-medium">
+                {{ __('健康指標') }}
             </a>
         </div>
         <div class="pt-4 pb-3 border-t border-gray-200">

@@ -9,7 +9,8 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory;
+    use Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -47,6 +48,22 @@ class User extends Authenticatable
      */
     public function weights()
     {
-        return $this->hasMany(Weight::class, 'user', 'id');
+        return $this->hasMany(Weight::class);
+    }
+
+    /**
+     * 獲取用戶的所有體重目標
+     */
+    public function weightGoals()
+    {
+        return $this->hasMany(WeightGoal::class);
+    }
+
+    /**
+     * 獲取用戶的活躍體重目標
+     */
+    public function activeWeightGoal()
+    {
+        return $this->hasOne(WeightGoal::class)->where('is_active', true);
     }
 }

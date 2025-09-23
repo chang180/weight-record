@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WeightController;
-
+use App\Http\Controllers\WeightGoalController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -18,18 +18,36 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth'])->name('dashboard');
+// 靜態頁面路由
+Route::get('/privacy', function () {
+    return view('pages.privacy');
+});
 
-Route::get('/record', [WeightController::class,'index'])->middleware(['auth'])->name('record');
+Route::get('/terms', function () {
+    return view('pages.terms');
+});
 
-Route::post('/record', [WeightController::class,'store'])->middleware(['auth'])->name('store');
+Route::get('/contact', function () {
+    return view('pages.contact');
+});
 
-Route::post('/edit/{id}', [WeightController::class,'edit'])->middleware(['auth'])->name('edit');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
 
-Route::get('/delete/{id}', [WeightController::class,'delete'])->middleware(['auth'])->name('delete');
-
-Route::get('/chart', [WeightController::class,'show'])->middleware(['auth'])->name('chart');
+    Route::resource('weights', WeightController::class);
+    Route::get('/record', [WeightController::class, 'index'])->name('record');
+    Route::get('/chart', [WeightController::class, 'show'])->name('chart');
+    Route::get('/api/weights/latest', [WeightController::class, 'latest'])->name('weights.latest');
+    Route::get('/weights/export/csv', [WeightController::class, 'exportCsv'])->name('weights.export.csv');
+    Route::get('/weights/export/pdf', [WeightController::class, 'exportPdf'])->name('weights.export.pdf');
+    Route::get('/analysis/trend', [WeightController::class, 'trendAnalysis'])->name('analysis.trend');
+    Route::get('/analysis/health', [WeightController::class, 'healthMetrics'])->name('analysis.health');
+    
+    // 體重目標路由
+    Route::resource('goals', WeightGoalController::class);
+    Route::patch('/goals/{goal}/activate', [WeightGoalController::class, 'activate'])->name('goals.activate');
+});
 
 require __DIR__.'/auth.php';

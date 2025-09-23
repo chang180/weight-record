@@ -1,13 +1,9 @@
 <x-guest-layout>
     <x-auth-card>
-        <x-slot name="logo">
-            <a href="/">
-                <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-            </a>
-        </x-slot>
-
-        <div class="mb-4 text-sm text-gray-600">
-            {{ __('忘記密碼了嗎？沒問題，請輸入您的email，我們會馬上發給您一個重新設定密碼的連結') }}
+        <!-- 頁面標題 -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">忘記密碼？</h1>
+            <p class="text-gray-600">沒問題，請輸入您的電子郵件，我們會發送重設密碼的連結給您</p>
         </div>
 
         <!-- Session Status -->
@@ -20,16 +16,29 @@
             @csrf
 
             <!-- Email Address -->
-            <div>
-                <x-label for="email" :value="__('Email')" />
-
-                <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
+            <div class="mb-6">
+                <x-label for="email" :value="__('電子郵件')" class="text-sm font-medium text-gray-700 mb-2" />
+                <x-input id="email" 
+                         class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-300" 
+                         type="email" 
+                         name="email" 
+                         :value="old('email')" 
+                         required 
+                         autofocus 
+                         placeholder="請輸入您的電子郵件" />
             </div>
 
-            <div class="flex items-center justify-end mt-4">
-                <x-button>
-                    {{ __('密碼重設連結') }}
-                </x-button>
+            <!-- Submit Button -->
+            <button type="submit" 
+                    class="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-300 transform hover:-translate-y-0.5 shadow-lg">
+                {{ __('發送重設連結') }}
+            </button>
+
+            <!-- Back to Login -->
+            <div class="text-center mt-6">
+                <a href="{{ route('login') }}" class="text-indigo-600 hover:text-indigo-800 font-medium transition duration-300">
+                    ← 返回登入頁面
+                </a>
             </div>
         </form>
     </x-auth-card>

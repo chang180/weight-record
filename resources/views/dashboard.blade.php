@@ -13,7 +13,23 @@
                     <h3 class="text-lg font-bold text-white">新增體重記錄</h3>
                 </div>
                 <div class="p-6">
-                    <form method="POST" action="{{ route('record') }}" class="space-y-6">
+                    @if (session('success'))
+                        <div class="mb-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if ($errors->any())
+                        <div class="mb-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
+                            <ul class="list-disc list-inside">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <form id="weight-store-form" method="POST" action="{{ route('weights.store') }}" class="space-y-6">
                         @csrf
                         <div>
                             <label for="record_at" class="block text-sm font-semibold text-gray-700 mb-2">{{ __('記錄日期') }}</label>
@@ -32,7 +48,6 @@
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none"
                                 placeholder="可選：記錄當天的飲食、運動或其他情況"></textarea>
                         </div>
-                        <input type="hidden" name="user" value="{{ Auth::user()->id }}">
                         <div class="flex justify-end">
                             <button type="submit"
                                 class="px-6 py-2 bg-indigo-600 text-white font-bold rounded-lg shadow hover:bg-indigo-700 transition duration-300 transform hover:-translate-y-1">
@@ -42,6 +57,55 @@
                     </form>
                 </div>
             </div>
+
+            <!-- 體重目標設定 -->
+            @php
+                $activeGoal = auth()->user()->activeWeightGoal;
+            @endphp
+            
+            @if($activeGoal)
+                <div class="mt-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-purple-800">🎯 當前目標</h3>
+                        <a href="{{ route('goals.index') }}" class="text-sm text-purple-600 hover:text-purple-800 font-medium">管理目標</a>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-purple-600">{{ $activeGoal->target_weight }} 公斤</div>
+                            <div class="text-sm text-purple-500">目標體重</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-purple-600">{{ $activeGoal->target_date->format('Y/m/d') }}</div>
+                            <div class="text-sm text-purple-500">目標日期</div>
+                        </div>
+                        <div class="text-center">
+                            @php
+                                $currentWeight = auth()->user()->weights()->latest('record_at')->first()?->weight ?? 0;
+                                $progress = $currentWeight > 0 ? min(100, max(0, (abs($currentWeight - $activeGoal->target_weight) / max(abs($currentWeight - $activeGoal->target_weight), 1)) * 100)) : 0;
+                            @endphp
+                            <div class="text-2xl font-bold text-purple-600">{{ round($progress) }}%</div>
+                            <div class="text-sm text-purple-500">進度</div>
+                        </div>
+                    </div>
+                    @if($activeGoal->description)
+                        <div class="mt-4 p-3 bg-white rounded-lg">
+                            <p class="text-sm text-gray-600">{{ $activeGoal->description }}</p>
+                        </div>
+                    @endif
+                </div>
+            @else
+                <div class="mt-6 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl p-6 border border-indigo-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-indigo-800">🎯 設定體重目標</h3>
+                            <p class="text-sm text-indigo-600 mt-1">設定目標可以幫助您更好地管理體重</p>
+                        </div>
+                        <a href="{{ route('goals.create') }}" class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition duration-300">
+                            設定目標
+                        </a>
+                    </div>
+                </div>
+            @endif
 
             <!-- 健康小提示 -->
             <div class="mt-6 bg-blue-50 rounded-xl p-4 border border-blue-200">

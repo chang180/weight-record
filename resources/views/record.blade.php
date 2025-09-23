@@ -41,11 +41,25 @@
             <div class="bg-white shadow-lg rounded-xl overflow-hidden">
                 <div class="px-6 py-4 bg-indigo-600 flex justify-between items-center">
                     <h3 class="text-lg font-bold text-white">所有體重記錄</h3>
-                    <a href="{{ route('dashboard') }}" class="px-4 py-2 bg-white text-indigo-600 font-bold rounded-lg shadow hover:bg-gray-100 transition duration-300">
-                        {{ __('新增記錄') }}
-                    </a>
+                    <div class="flex space-x-2">
+                        <a href="{{ route('weights.export.csv') }}" class="px-4 py-2 bg-green-600 text-white font-bold rounded-lg shadow hover:bg-green-700 transition duration-300">
+                            📊 CSV
+                        </a>
+                        <a href="{{ route('weights.export.pdf') }}" class="px-4 py-2 bg-red-600 text-white font-bold rounded-lg shadow hover:bg-red-700 transition duration-300">
+                            📄 PDF
+                        </a>
+                        <a href="{{ route('dashboard') }}" class="px-4 py-2 bg-white text-indigo-600 font-bold rounded-lg shadow hover:bg-gray-100 transition duration-300">
+                            {{ __('新增記錄') }}
+                        </a>
+                    </div>
                 </div>
                 <div class="p-6">
+                    @if (session('success'))
+                        <div class="mb-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
                     @if (count($weights) != 0)
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
@@ -61,8 +75,9 @@
                                     @foreach ($weights as $item)
                                     <tr class="hover:bg-gray-50">
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <form action="/edit/{{ $item->id }}" method="POST" class="flex items-center space-x-2">
+                                            <form action="{{ route('weights.update', $item->id) }}" method="POST" class="weight-update-form flex items-center space-x-2">
                                                 @csrf
+                                                @method('PUT')
                                                 <div class="text-sm text-gray-900 font-medium">{{ \Carbon\Carbon::parse($item->record_at)->format('Y-m-d') }}</div>
                                                 <input type="hidden" name="record_at" value="{{ $item->record_at }}">
                                         </td>
@@ -75,7 +90,6 @@
                                                 class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none text-sm w-full">
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                <input type="hidden" name="user" value="{{ Auth::user()->id }}">
                                                 <button type="submit" class="text-indigo-600 hover:text-indigo-900 font-medium mr-2 inline-flex items-center">
                                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -83,12 +97,16 @@
                                                     儲存
                                                 </button>
                                             </form>
-                                            <a href="/delete/{{ $item->id }}" onclick="return confirm('確定要刪除這筆記錄嗎？')" class="text-red-600 hover:text-red-900 font-medium inline-flex items-center">
-                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                                </svg>
-                                                刪除
-                                            </a>
+                                            <form action="{{ route('weights.destroy', $item->id) }}" method="POST" class="weight-delete-form inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-red-600 hover:text-red-900 font-medium inline-flex items-center">
+                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                    </svg>
+                                                    刪除
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
                                     @endforeach

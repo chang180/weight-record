@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php artisan make:migration:*)",
+      "Bash(php artisan:*)",
+      "Bash(composer require:*)",
+      "Bash(./vendor/bin/php-cs-fixer fix:*)",
+      "Bash(./vendor/bin/phpunit:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(npm run build:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(composer update:*)",
+      "Bash(composer install:*)",
+      "Bash(php:*)",
+      "Bash(herd:*)",
+      "Bash(where php)",
+      "Bash(C:Userschang180.configherdbinphp.bat -v)",
+      "Bash(\"C:\\Users\\chang180\\.config\\herd\\bin\\php.bat\":*)",
+      "Bash(\"C:\\Users\\chang180\\.config\\herd\\bin\\composer.bat\" --version)",
+      "Bash(\"C:\\Users\\chang180\\.config\\herd\\bin\\composer.bat\" install)",
+      "Bash(\"C:\\Users\\chang180\\.config\\herd\\bin\\composer.bat\" update)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
