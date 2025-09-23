@@ -26,6 +26,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('weights', WeightController::class);
     Route::get('/record', [WeightController::class, 'index'])->name('record');
     Route::get('/chart', [WeightController::class, 'show'])->name('chart');
+    Route::get('/api/weights/latest', [WeightController::class, 'latest'])->name('weights.latest');
 });
 
 require __DIR__.'/auth.php';

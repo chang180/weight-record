@@ -29,7 +29,7 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('weights.store') }}" class="space-y-6">
+                    <form id="weight-store-form" method="POST" action="{{ route('weights.store') }}" class="space-y-6">
                         @csrf
                         <div>
                             <label for="record_at" class="block text-sm font-semibold text-gray-700 mb-2">{{ __('記錄日期') }}</label>

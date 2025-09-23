@@ -67,7 +67,7 @@
                                     @foreach ($weights as $item)
                                     <tr class="hover:bg-gray-50">
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <form action="{{ route('weights.update', $item->id) }}" method="POST" class="flex items-center space-x-2">
+                                            <form action="{{ route('weights.update', $item->id) }}" method="POST" class="weight-update-form flex items-center space-x-2">
                                                 @csrf
                                                 @method('PUT')
                                                 <div class="text-sm text-gray-900 font-medium">{{ \Carbon\Carbon::parse($item->record_at)->format('Y-m-d') }}</div>
@@ -89,7 +89,7 @@
                                                     儲存
                                                 </button>
                                             </form>
-                                            <form action="{{ route('weights.destroy', $item->id) }}" method="POST" class="inline" onsubmit="return confirm('確定要刪除這筆記錄嗎？')">
+                                            <form action="{{ route('weights.destroy', $item->id) }}" method="POST" class="weight-delete-form inline">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="text-red-600 hover:text-red-900 font-medium inline-flex items-center">
