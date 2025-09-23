@@ -268,7 +268,14 @@ class WeightController extends Controller
             $weights = Weight::where('user_id', $user_id)
                 ->where('record_at', '>=', now()->subDays($days))
                 ->orderBy('record_at', 'asc')
-                ->get();
+                ->get()
+                ->map(function ($weight) {
+                    // 確保 record_at 被正確轉換為 Carbon 實例
+                    if ($weight->record_at && !($weight->record_at instanceof \Carbon\Carbon)) {
+                        $weight->record_at = \Carbon\Carbon::parse($weight->record_at);
+                    }
+                    return $weight;
+                });
 
             // 計算趨勢統計
             $analysis = $this->calculateTrendAnalysis($weights);
@@ -356,8 +363,16 @@ class WeightController extends Controller
         if ($weights->count() > 0) {
             $firstWeight = $weights->first();
             $lastWeight = $weights->last();
-            if ($firstWeight && $lastWeight) {
-                $totalDays = $firstWeight->record_at->diffInDays($lastWeight->record_at) + 1;
+            if ($firstWeight && $lastWeight && $firstWeight->record_at && $lastWeight->record_at) {
+                // 確保 record_at 是 Carbon 實例
+                $firstDate = $firstWeight->record_at instanceof \Carbon\Carbon 
+                    ? $firstWeight->record_at 
+                    : \Carbon\Carbon::parse($firstWeight->record_at);
+                $lastDate = $lastWeight->record_at instanceof \Carbon\Carbon 
+                    ? $lastWeight->record_at 
+                    : \Carbon\Carbon::parse($lastWeight->record_at);
+                
+                $totalDays = $firstDate->diffInDays($lastDate) + 1;
             }
         }
         $consistencyScore = min(100, ($weights->count() / $totalDays) * 100);
