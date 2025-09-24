@@ -20,7 +20,9 @@
       "Bash(\"C:\\Users\\chang180\\.config\\herd\\bin\\php.bat\":*)",
       "Bash(\"C:\\Users\\chang180\\.config\\herd\\bin\\composer.bat\" --version)",
       "Bash(\"C:\\Users\\chang180\\.config\\herd\\bin\\composer.bat\" install)",
-      "Bash(\"C:\\Users\\chang180\\.config\\herd\\bin\\composer.bat\" update)"
+      "Bash(\"C:\\Users\\chang180\\.config\\herd\\bin\\composer.bat\" update)",
+      "Bash(composer:*)",
+      "Bash(mv:*)"
     ],
     "deny": [],
     "ask": []
