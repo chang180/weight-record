@@ -104,17 +104,17 @@ class WeightController extends Controller
      */
     public function show(): View|\Illuminate\Http\RedirectResponse
     {
-        $user_id = Auth::id();
+        $user = Auth::user();
         
         // 檢查用戶是否已認證
-        if (!$user_id) {
+        if (!$user || !$user->id) {
             return redirect()->route('login')->with('error', '請先登入');
         }
 
-        $cacheKey = 'chart.weights.user.' . $user_id;
+        $cacheKey = 'chart.weights.user.' . $user->id;
 
-        $weights = Cache::remember($cacheKey, 600, function () use ($user_id) {
-            return Weight::where('user_id', $user_id)
+        $weights = Cache::remember($cacheKey, 600, function () use ($user) {
+            return Weight::where('user_id', $user->id)
                 ->orderBy('record_at', 'ASC')
                 ->get();
         });
@@ -166,7 +166,8 @@ class WeightController extends Controller
     public function destroy(Weight $weight, Request $request): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         // 確認該記錄屬於當前用戶
-        if ($weight->user_id !== Auth::id()) {
+        $user = Auth::user();
+        if (!$user || $weight->user_id !== $user->id) {
             abort(403);
         }
 
@@ -185,20 +186,24 @@ class WeightController extends Controller
      */
     public function latest(): \Illuminate\Http\JsonResponse
     {
-        $user_id = Auth::id();
+        $user = Auth::user();
         
         // 檢查用戶是否已認證
-        if (!$user_id) {
+        if (!$user || !$user->id) {
+            Log::error('WeightController::latest - 用戶未認證或 user_id 為空', [
+                'user' => $user,
+                'user_id' => $user ? $user->id : null
+            ]);
             return response()->json([
                 'success' => false,
                 'message' => '請先登入'
             ], 401);
         }
 
-        $cacheKey = 'latest.weights.user.' . $user_id;
+        $cacheKey = 'latest.weights.user.' . $user->id;
 
-        $weights = Cache::remember($cacheKey, 180, function () use ($user_id) {
-            return Weight::where('user_id', $user_id)
+        $weights = Cache::remember($cacheKey, 180, function () use ($user) {
+            return Weight::where('user_id', $user->id)
                 ->orderBy('record_at', 'DESC')
                 ->limit(10)
                 ->get();
@@ -237,14 +242,14 @@ class WeightController extends Controller
      */
     public function exportCsv(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
     {
-        $user_id = Auth::id();
+        $user = Auth::user();
         
         // 檢查用戶是否已認證
-        if (!$user_id) {
+        if (!$user || !$user->id) {
             abort(401, '請先登入');
         }
         
-        $weights = Weight::where('user_id', $user_id)
+        $weights = Weight::where('user_id', $user->id)
             ->orderBy('record_at', 'desc')
             ->get();
 
@@ -288,18 +293,16 @@ class WeightController extends Controller
      */
     public function exportPdf(Request $request)
     {
-        $user_id = Auth::id();
+        $user = Auth::user();
         
         // 檢查用戶是否已認證
-        if (!$user_id) {
+        if (!$user || !$user->id) {
             abort(401, '請先登入');
         }
         
-        $weights = Weight::where('user_id', $user_id)
+        $weights = Weight::where('user_id', $user->id)
             ->orderBy('record_at', 'desc')
             ->get();
-
-        $user = Auth::user();
         
         $pdf = Pdf::loadView('exports.weight-pdf', compact('weights', 'user'));
         
@@ -312,16 +315,16 @@ class WeightController extends Controller
     public function trendAnalysis(Request $request): View|\Illuminate\Http\RedirectResponse
     {
         try {
-            $user_id = Auth::id();
+            $user = Auth::user();
             
             // 檢查用戶是否已認證
-            if (!$user_id) {
+            if (!$user || !$user->id) {
                 return redirect()->route('login')->with('error', '請先登入');
             }
             
             $days = $request->get('days', 30); // 預設分析最近30天
             
-            $weights = Weight::where('user_id', $user_id)
+            $weights = Weight::where('user_id', $user->id)
                 ->where('record_at', '>=', now()->subDays($days))
                 ->orderBy('record_at', 'asc')
                 ->get()
@@ -340,7 +343,7 @@ class WeightController extends Controller
         } catch (\Exception $e) {
             // 記錄錯誤並返回錯誤頁面
             Log::error('Trend analysis error: ' . $e->getMessage(), [
-                'user_id' => Auth::id(),
+                'user_id' => Auth::user() ? Auth::user()->id : null,
                 'days' => $request->get('days', 30),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -466,15 +469,15 @@ class WeightController extends Controller
      */
     public function healthMetrics(Request $request): View|\Illuminate\Http\RedirectResponse
     {
-        $user_id = Auth::id();
+        $user = Auth::user();
         
         // 檢查用戶是否已認證
-        if (!$user_id) {
+        if (!$user || !$user->id) {
             return redirect()->route('login')->with('error', '請先登入');
         }
         
         // 獲取最新體重記錄
-        $latestWeight = Weight::where('user_id', $user_id)
+        $latestWeight = Weight::where('user_id', $user->id)
             ->orderBy('record_at', 'desc')
             ->first();
 
