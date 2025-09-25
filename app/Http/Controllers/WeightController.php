@@ -22,18 +22,18 @@ class WeightController extends Controller
      */
     public function index(Request $request): View|\Illuminate\Http\RedirectResponse
     {
-        $user_id = Auth::id();
+        $user = Auth::user();
         
         // 檢查用戶是否已認證
-        if (!$user_id) {
+        if (!$user) {
             return redirect()->route('login')->with('error', '請先登入');
         }
 
         // 為分頁和篩選創建快取鍵
-        $cacheKey = 'weights.user.' . $user_id . '.page.' . ($request->get('page', 1)) . '.filters.' . md5(serialize($request->only(['start_date', 'end_date'])));
+        $cacheKey = 'weights.user.' . $user->id . '.page.' . ($request->get('page', 1)) . '.filters.' . md5(serialize($request->only(['start_date', 'end_date'])));
 
-        $weights = Cache::remember($cacheKey, 300, function () use ($user_id, $request) {
-            $query = Weight::where('user_id', $user_id);
+        $weights = Cache::remember($cacheKey, 300, function () use ($user, $request) {
+            $query = Weight::where('user_id', $user->id);
 
             // 處理日期範圍篩選
             if ($request->filled('start_date')) {
@@ -67,19 +67,19 @@ class WeightController extends Controller
     public function store(StoreWeightRequest $request): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $data = $request->validated();
-        $user_id = Auth::id();
+        $user = Auth::user();
         
         // 檢查用戶是否已認證
-        if (!$user_id) {
+        if (!$user) {
             return redirect()->route('login')->with('error', '請先登入');
         }
         
-        $data['user_id'] = $user_id;
+        $data['user_id'] = $user->id;
 
         $weight = Weight::create($data);
 
         // 清除相關快取
-        $this->clearUserWeightCache($data['user_id']);
+        $this->clearUserWeightCache($user->id);
 
         return redirect()->route('dashboard')
             ->with('success', '體重記錄已成功儲存');
@@ -114,19 +114,19 @@ class WeightController extends Controller
     public function update(UpdateWeightRequest $request, Weight $weight): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $data = $request->validated();
-        $user_id = Auth::id();
+        $user = Auth::user();
         
         // 檢查用戶是否已認證
-        if (!$user_id) {
+        if (!$user) {
             return redirect()->route('login')->with('error', '請先登入');
         }
         
-        $data['user_id'] = $user_id;
+        $data['user_id'] = $user->id;
 
         $weight->update($data);
 
         // 清除相關快取
-        $this->clearUserWeightCache($data['user_id']);
+        $this->clearUserWeightCache($user->id);
 
         return redirect()->route('record')
             ->with('success', '體重記錄已成功更新');

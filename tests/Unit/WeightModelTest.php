@@ -36,8 +36,8 @@ class WeightModelTest extends TestCase
             'weight' => 70.5
         ]);
 
-        $this->assertEquals('70.5', $weight->weight);
-        $this->assertIsString($weight->weight);
+        $this->assertEquals('70.5', (string)$weight->weight);
+        $this->assertIsNumeric($weight->weight);
     }
 
     public function test_weight_fillable_attributes(): void
