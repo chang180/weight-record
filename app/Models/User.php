@@ -36,19 +36,20 @@ class User extends Authenticatable
 
     /**
      * The attributes that should be cast.
-     *
-     * @var array<string, string>
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-        'height' => 'decimal:2',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'height' => 'decimal:2',
+        ];
+    }
 
     /**
      * 獲取用戶的所有體重記錄
      */
-    public function weights()
+    public function weights(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Weight::class);
     }
@@ -56,7 +57,7 @@ class User extends Authenticatable
     /**
      * 獲取用戶的所有體重目標
      */
-    public function weightGoals()
+    public function weightGoals(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(WeightGoal::class);
     }
@@ -64,7 +65,7 @@ class User extends Authenticatable
     /**
      * 獲取用戶的活躍體重目標
      */
-    public function activeWeightGoal()
+    public function activeWeightGoal(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(WeightGoal::class)->where('is_active', true);
     }
