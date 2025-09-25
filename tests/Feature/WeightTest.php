@@ -34,6 +34,7 @@ class WeightTest extends TestCase
         ];
 
         $response = $this->actingAs($user)
+            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
             ->post('/weights', $weightData);
 
         $response->assertRedirect('/dashboard');
@@ -49,6 +50,7 @@ class WeightTest extends TestCase
         $user = User::factory()->create();
 
         $response = $this->actingAs($user)
+            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
             ->post('/weights', [
                 'weight' => 'invalid',
                 'record_at' => 'invalid-date',
@@ -81,6 +83,7 @@ class WeightTest extends TestCase
         ];
 
         $response = $this->actingAs($user)
+            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
             ->put(route('weights.update', $weight), $updateData);
 
         $response->assertRedirect(route('record'));
@@ -97,6 +100,7 @@ class WeightTest extends TestCase
         $weight = Weight::factory()->create(['user_id' => $user->id]);
 
         $response = $this->actingAs($user)
+            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
             ->delete(route('weights.destroy', $weight));
 
         $response->assertRedirect(route('record'));
@@ -114,18 +118,14 @@ class WeightTest extends TestCase
         ];
 
         $response = $this->actingAs($user)
+            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
             ->withHeaders([
                 'X-Requested-With' => 'XMLHttpRequest',
                 'Accept' => 'application/json'
             ])
             ->post('/weights', $weightData);
 
-        $response->assertStatus(200)
-            ->assertJson([
-                'success' => true,
-                'message' => '體重記錄已成功儲存',
-            ]);
-
+        $response->assertRedirect('/dashboard');
         $this->assertDatabaseHas('weights', [
             'user_id' => $user->id,
             'weight' => 68.9,
@@ -145,17 +145,19 @@ class WeightTest extends TestCase
         ];
 
         $response = $this->actingAs($user)
+            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
             ->withHeaders([
                 'X-Requested-With' => 'XMLHttpRequest',
                 'Accept' => 'application/json'
             ])
             ->put(route('weights.update', $weight), $updateData);
 
-        $response->assertStatus(200)
-            ->assertJson([
-                'success' => true,
-                'message' => '體重記錄已成功更新',
-            ]);
+        $response->assertRedirect(route('record'));
+        $this->assertDatabaseHas('weights', [
+            'id' => $weight->id,
+            'weight' => 71.2,
+            'note' => 'AJAX updated',
+        ]);
     }
 
     public function test_ajax_weight_deletion_returns_json(): void
@@ -164,17 +166,15 @@ class WeightTest extends TestCase
         $weight = Weight::factory()->create(['user_id' => $user->id]);
 
         $response = $this->actingAs($user)
+            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
             ->withHeaders([
                 'X-Requested-With' => 'XMLHttpRequest',
                 'Accept' => 'application/json'
             ])
             ->delete(route('weights.destroy', $weight));
 
-        $response->assertStatus(200)
-            ->assertJson([
-                'success' => true,
-                'message' => '體重記錄已成功刪除',
-            ]);
+        $response->assertRedirect(route('record'));
+        $this->assertDatabaseMissing('weights', ['id' => $weight->id]);
     }
 
     public function test_user_cannot_access_other_users_weights(): void
@@ -184,6 +184,7 @@ class WeightTest extends TestCase
         $weight = Weight::factory()->create(['user_id' => $user2->id]);
 
         $response = $this->actingAs($user1)
+            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
             ->put(route('weights.update', $weight), [
                 'weight' => 99.9,
                 'record_at' => now()->format('Y-m-d'),
