@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -19,9 +20,14 @@ class WeightController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|\Illuminate\Http\RedirectResponse
     {
         $user_id = Auth::id();
+        
+        // 檢查用戶是否已認證
+        if (!$user_id) {
+            return redirect()->route('login')->with('error', '請先登入');
+        }
 
         // 為分頁和篩選創建快取鍵
         $cacheKey = 'weights.user.' . $user_id . '.page.' . ($request->get('page', 1)) . '.filters.' . md5(serialize($request->only(['start_date', 'end_date'])));
@@ -61,20 +67,19 @@ class WeightController extends Controller
     public function store(StoreWeightRequest $request): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $data = $request->validated();
-        $data['user_id'] = Auth::id();
+        $user_id = Auth::id();
+        
+        // 檢查用戶是否已認證
+        if (!$user_id) {
+            return redirect()->route('login')->with('error', '請先登入');
+        }
+        
+        $data['user_id'] = $user_id;
 
         $weight = Weight::create($data);
 
         // 清除相關快取
         $this->clearUserWeightCache($data['user_id']);
-
-        if ($request->expectsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => '體重記錄已成功儲存',
-                'data' => $weight
-            ]);
-        }
 
         return redirect()->route('dashboard')
             ->with('success', '體重記錄已成功儲存');
@@ -83,9 +88,14 @@ class WeightController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(): View
+    public function show(): View|\Illuminate\Http\RedirectResponse
     {
         $user_id = Auth::id();
+        
+        // 檢查用戶是否已認證
+        if (!$user_id) {
+            return redirect()->route('login')->with('error', '請先登入');
+        }
 
         $cacheKey = 'chart.weights.user.' . $user_id;
 
@@ -104,20 +114,19 @@ class WeightController extends Controller
     public function update(UpdateWeightRequest $request, Weight $weight): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $data = $request->validated();
-        $data['user_id'] = Auth::id();
+        $user_id = Auth::id();
+        
+        // 檢查用戶是否已認證
+        if (!$user_id) {
+            return redirect()->route('login')->with('error', '請先登入');
+        }
+        
+        $data['user_id'] = $user_id;
 
         $weight->update($data);
 
         // 清除相關快取
         $this->clearUserWeightCache($data['user_id']);
-
-        if ($request->expectsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => '體重記錄已成功更新',
-                'data' => $weight->fresh()
-            ]);
-        }
 
         return redirect()->route('record')
             ->with('success', '體重記錄已成功更新');
@@ -139,13 +148,6 @@ class WeightController extends Controller
         // 清除相關快取
         $this->clearUserWeightCache($user_id);
 
-        if ($request->expectsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => '體重記錄已成功刪除'
-            ]);
-        }
-
         return redirect()->route('record')
             ->with('success', '體重記錄已成功刪除');
     }
@@ -156,6 +158,14 @@ class WeightController extends Controller
     public function latest(): \Illuminate\Http\JsonResponse
     {
         $user_id = Auth::id();
+        
+        // 檢查用戶是否已認證
+        if (!$user_id) {
+            return response()->json([
+                'success' => false,
+                'message' => '請先登入'
+            ], 401);
+        }
 
         $cacheKey = 'latest.weights.user.' . $user_id;
 
@@ -200,6 +210,12 @@ class WeightController extends Controller
     public function exportCsv(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         $user_id = Auth::id();
+        
+        // 檢查用戶是否已認證
+        if (!$user_id) {
+            abort(401, '請先登入');
+        }
+        
         $weights = Weight::where('user_id', $user_id)
             ->orderBy('record_at', 'desc')
             ->get();
@@ -245,6 +261,12 @@ class WeightController extends Controller
     public function exportPdf(Request $request)
     {
         $user_id = Auth::id();
+        
+        // 檢查用戶是否已認證
+        if (!$user_id) {
+            abort(401, '請先登入');
+        }
+        
         $weights = Weight::where('user_id', $user_id)
             ->orderBy('record_at', 'desc')
             ->get();
@@ -259,10 +281,16 @@ class WeightController extends Controller
     /**
      * 體重趨勢分析
      */
-    public function trendAnalysis(Request $request): View
+    public function trendAnalysis(Request $request): View|\Illuminate\Http\RedirectResponse
     {
         try {
             $user_id = Auth::id();
+            
+            // 檢查用戶是否已認證
+            if (!$user_id) {
+                return redirect()->route('login')->with('error', '請先登入');
+            }
+            
             $days = $request->get('days', 30); // 預設分析最近30天
             
             $weights = Weight::where('user_id', $user_id)
@@ -283,7 +311,7 @@ class WeightController extends Controller
             return view('analysis.trend', compact('weights', 'analysis', 'days'));
         } catch (\Exception $e) {
             // 記錄錯誤並返回錯誤頁面
-            \Log::error('Trend analysis error: ' . $e->getMessage(), [
+            Log::error('Trend analysis error: ' . $e->getMessage(), [
                 'user_id' => Auth::id(),
                 'days' => $request->get('days', 30),
                 'trace' => $e->getTraceAsString()
@@ -408,9 +436,14 @@ class WeightController extends Controller
     /**
      * 健康指標計算
      */
-    public function healthMetrics(Request $request): View
+    public function healthMetrics(Request $request): View|\Illuminate\Http\RedirectResponse
     {
         $user_id = Auth::id();
+        
+        // 檢查用戶是否已認證
+        if (!$user_id) {
+            return redirect()->route('login')->with('error', '請先登入');
+        }
         
         // 獲取最新體重記錄
         $latestWeight = Weight::where('user_id', $user_id)
