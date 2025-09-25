@@ -34,7 +34,7 @@ class WeightTest extends TestCase
         ];
 
         $response = $this->actingAs($user)
-            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+            ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])
             ->post('/weights', $weightData);
 
         $response->assertRedirect('/dashboard');
@@ -50,7 +50,7 @@ class WeightTest extends TestCase
         $user = User::factory()->create();
 
         $response = $this->actingAs($user)
-            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+            ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])
             ->post('/weights', [
                 'weight' => 'invalid',
                 'record_at' => 'invalid-date',
@@ -78,12 +78,12 @@ class WeightTest extends TestCase
 
         $updateData = [
             'weight' => 72.3,
-            'record_at' => $weight->record_at->format('Y-m-d'),
+            'record_at' => is_string($weight->record_at) ? $weight->record_at : $weight->record_at->format('Y-m-d'),
             'note' => 'Updated note',
         ];
 
         $response = $this->actingAs($user)
-            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+            ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])
             ->put(route('weights.update', $weight), $updateData);
 
         $response->assertRedirect(route('record'));
@@ -100,7 +100,7 @@ class WeightTest extends TestCase
         $weight = Weight::factory()->create(['user_id' => $user->id]);
 
         $response = $this->actingAs($user)
-            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+            ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])
             ->delete(route('weights.destroy', $weight));
 
         $response->assertRedirect(route('record'));
@@ -118,7 +118,7 @@ class WeightTest extends TestCase
         ];
 
         $response = $this->actingAs($user)
-            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+            ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])
             ->withHeaders([
                 'X-Requested-With' => 'XMLHttpRequest',
                 'Accept' => 'application/json'
@@ -140,12 +140,12 @@ class WeightTest extends TestCase
 
         $updateData = [
             'weight' => 71.2,
-            'record_at' => $weight->record_at->format('Y-m-d'),
+            'record_at' => is_string($weight->record_at) ? $weight->record_at : $weight->record_at->format('Y-m-d'),
             'note' => 'AJAX updated',
         ];
 
         $response = $this->actingAs($user)
-            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+            ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])
             ->withHeaders([
                 'X-Requested-With' => 'XMLHttpRequest',
                 'Accept' => 'application/json'
@@ -166,7 +166,7 @@ class WeightTest extends TestCase
         $weight = Weight::factory()->create(['user_id' => $user->id]);
 
         $response = $this->actingAs($user)
-            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+            ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])
             ->withHeaders([
                 'X-Requested-With' => 'XMLHttpRequest',
                 'Accept' => 'application/json'

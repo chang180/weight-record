@@ -23,13 +23,10 @@ class Weight extends Model
     /**
      * 屬性轉換
      */
-    protected function casts(): array
-    {
-        return [
-            'record_at' => 'date',
-            'weight' => 'decimal:1',
-        ];
-    }
+    protected $casts = [
+        'record_at' => 'date',
+        'weight' => 'decimal:1',
+    ];
 
     /**
      * 獲取擁有此體重記錄的用戶
