@@ -70,11 +70,25 @@ class WeightController extends Controller
         $user = Auth::user();
         
         // 檢查用戶是否已認證
-        if (!$user) {
+        if (!$user || !$user->id) {
+            Log::error('WeightController::store - 用戶未認證或 user_id 為空', [
+                'user' => $user,
+                'user_id' => $user ? $user->id : null
+            ]);
             return redirect()->route('login')->with('error', '請先登入');
         }
         
+        // 確保 user_id 不為空
         $data['user_id'] = $user->id;
+        
+        // 再次檢查 user_id 是否為空
+        if (empty($data['user_id'])) {
+            Log::error('WeightController::store - user_id 為空', [
+                'data' => $data,
+                'user' => $user
+            ]);
+            return redirect()->route('login')->with('error', '認證錯誤，請重新登入');
+        }
 
         $weight = Weight::create($data);
 
@@ -117,11 +131,25 @@ class WeightController extends Controller
         $user = Auth::user();
         
         // 檢查用戶是否已認證
-        if (!$user) {
+        if (!$user || !$user->id) {
+            Log::error('WeightController::update - 用戶未認證或 user_id 為空', [
+                'user' => $user,
+                'user_id' => $user ? $user->id : null
+            ]);
             return redirect()->route('login')->with('error', '請先登入');
         }
         
+        // 確保 user_id 不為空
         $data['user_id'] = $user->id;
+        
+        // 再次檢查 user_id 是否為空
+        if (empty($data['user_id'])) {
+            Log::error('WeightController::update - user_id 為空', [
+                'data' => $data,
+                'user' => $user
+            ]);
+            return redirect()->route('login')->with('error', '認證錯誤，請重新登入');
+        }
 
         $weight->update($data);
 
