@@ -15,28 +15,31 @@ class Weight extends Model
      * @var array
      */
     protected $fillable = [
-        'user',
+        'user_id',
         'weight',
         'record_at',
         'note'
     ];
 
     /**
-     * 應該被轉換為日期的屬性
+     * 屬性的轉換類型
      *
-     * @var array
+     * @return array
      */
-    protected $dates = [
-        'record_at',
-        'created_at',
-        'updated_at'
-    ];
+    protected function casts(): array
+    {
+        return [
+            'record_at' => 'date',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime'
+        ];
+    }
 
     /**
      * 獲取擁有此體重記錄的用戶
      */
     public function user()
     {
-        return $this->belongsTo(User::class, 'user', 'id');
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 }

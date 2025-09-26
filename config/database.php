@@ -2,8 +2,6 @@
 
 use Illuminate\Support\Str;
 
-$DATABASE_URL=parse_url('postgres://zgszezeoqihwap:65dedd4387292a02433e0a8adb447ea2be97b2d3fed21de4ec52516f21968db1@ec2-54-145-249-177.compute-1.amazonaws.com:5432/d8uhqs4vrecrak');
-
 return [
 
     /*
