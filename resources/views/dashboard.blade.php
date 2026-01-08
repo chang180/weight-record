@@ -13,6 +13,12 @@
                     <h3 class="text-lg font-bold text-white">新增體重記錄</h3>
                 </div>
                 <div class="p-6">
+                    @if (session('status'))
+                        <div class="mb-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded">
+                            {{ session('status') }}
+                        </div>
+                    @endif
+
                     @if (session('success'))
                         <div class="mb-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded">
                             {{ session('success') }}
