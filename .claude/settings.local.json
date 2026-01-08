@@ -28,7 +28,10 @@
       "Bash(git reset:*)",
       "Bash(git checkout:*)",
       "Bash(git stash show:*)",
-      "Bash(git stash drop:*)"
+      "Bash(git stash drop:*)",
+      "Bash(git config:*)",
+      "Bash(git remote:*)",
+      "Bash(ssh:*)"
     ],
     "deny": [],
     "ask": []
