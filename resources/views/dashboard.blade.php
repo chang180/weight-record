@@ -19,6 +19,32 @@
                         </div>
                     @endif
 
+                    @if(session('achievement'))
+                        <div x-data="{ show: true }" 
+                             x-show="show"
+                             x-transition:enter="transition ease-out duration-500"
+                             x-transition:enter-start="opacity-0 transform translate-y-[-100px] scale-90"
+                             x-transition:enter-end="opacity-100 transform translate-y-0 scale-100"
+                             x-transition:leave="transition ease-in duration-300"
+                             x-transition:leave-start="opacity-100"
+                             x-transition:leave-end="opacity-0"
+                             @click.away="setTimeout(() => show = false, 5000)"
+                             class="mb-4 bg-gradient-to-r from-yellow-400 to-orange-500 border-2 border-yellow-300 rounded-lg p-4 shadow-lg animate-pulse">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 text-4xl animate-bounce">🎉</div>
+                                <div class="ml-4 flex-1">
+                                    <p class="text-lg font-bold text-white">成就解鎖！</p>
+                                    <p class="text-sm text-yellow-100">{{ session('achievement') }}</p>
+                                </div>
+                                <button @click="show = false" class="text-white hover:text-yellow-200">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    @endif
+
                     @if ($errors->any())
                         <div class="mb-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
                             <ul class="list-disc list-inside">
@@ -38,7 +64,7 @@
                         </div>
                         <div>
                             <label for="weight" class="block text-sm font-semibold text-gray-700 mb-2">{{ __('體重 (kg)') }}</label>
-                            <input id="weight" name="weight" type="number" step="0.1" min="0" :value="old('體重')" required
+                            <input id="weight" name="weight" type="number" step="0.1" min="0" value="{{ old('weight') }}" required
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none"
                                 placeholder="例如：68.5" />
                         </div>
@@ -81,10 +107,22 @@
                         <div class="text-center">
                             @php
                                 $currentWeight = auth()->user()->weights()->latest('record_at')->first()?->weight ?? 0;
-                                $progress = $currentWeight > 0 ? min(100, max(0, (abs($currentWeight - $activeGoal->target_weight) / max(abs($currentWeight - $activeGoal->target_weight), 1)) * 100)) : 0;
+                                $startWeight = auth()->user()->start_weight ?? $currentWeight;
+                                $targetWeight = $activeGoal->target_weight;
+                                if ($startWeight && $currentWeight && $targetWeight) {
+                                    $totalChange = abs($startWeight - $targetWeight);
+                                    $currentChange = abs($startWeight - $currentWeight);
+                                    $progress = $totalChange > 0 ? min(100, ($currentChange / $totalChange) * 100) : 0;
+                                } else {
+                                    $progress = 0;
+                                }
                             @endphp
                             <div class="text-2xl font-bold text-purple-600">{{ round($progress) }}%</div>
                             <div class="text-sm text-purple-500">進度</div>
+                            <div class="mt-2 w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-purple-600 h-2 rounded-full transition-all duration-500 ease-out" 
+                                     style="width: {{ round($progress) }}%"></div>
+                            </div>
                         </div>
                     </div>
                     @if($activeGoal->description)
@@ -103,6 +141,77 @@
                         <a href="{{ route('goals.create') }}" class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition duration-300">
                             設定目標
                         </a>
+                    </div>
+                </div>
+            @endif
+
+            <!-- 遊戲化快速資訊 -->
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-4 text-white transition-all duration-300 hover:shadow-xl">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-purple-100 text-xs">可用積分</p>
+                            <p class="text-2xl font-bold transition-all duration-300" 
+                               x-data="{ points: {{ auth()->user()->available_points }} }"
+                               x-text="points">{{ auth()->user()->available_points }}</p>
+                        </div>
+                        <div class="text-3xl transition-transform duration-300 hover:rotate-12">💎</div>
+                    </div>
+                    <a href="{{ route('daily-logs.index') }}" class="text-purple-100 text-xs hover:text-white mt-2 block transition-colors">
+                        前往今日任務 →
+                    </a>
+                </div>
+
+                <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg p-4 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-orange-100 text-xs">當前連續</p>
+                            <p class="text-2xl font-bold">{{ auth()->user()->current_streak }} 天</p>
+                        </div>
+                        <div class="text-3xl">🔥</div>
+                    </div>
+                    <a href="{{ route('achievements.index') }}" class="text-orange-100 text-xs hover:text-white mt-2 block">
+                        查看成就 →
+                    </a>
+                </div>
+
+                <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-4 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-green-100 text-xs">可兌換獎勵</p>
+                            <p class="text-2xl font-bold">5 種</p>
+                        </div>
+                        <div class="text-3xl">🎁</div>
+                    </div>
+                    <a href="{{ route('rewards.index') }}" class="text-green-100 text-xs hover:text-white mt-2 block">
+                        前往商店 →
+                    </a>
+                </div>
+            </div>
+
+            <!-- 最近解鎖的成就 -->
+            @php
+                $recentAchievements = auth()->user()->achievements()
+                    ->orderBy('user_achievements.unlocked_at', 'desc')
+                    ->limit(3)
+                    ->get();
+            @endphp
+
+            @if($recentAchievements->count() > 0)
+                <div class="mt-6 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 border border-yellow-200">
+                    <h3 class="text-lg font-semibold text-yellow-800 mb-4">🏆 最近解鎖的成就</h3>
+                    <div class="space-y-3">
+                        @foreach($recentAchievements as $achievement)
+                            <div class="flex items-center bg-white rounded-lg p-3">
+                                <div class="text-3xl mr-3">{{ $achievement->icon }}</div>
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-gray-800">{{ $achievement->name }}</h4>
+                                    <p class="text-xs text-gray-500">
+                                        {{ \Carbon\Carbon::parse($achievement->pivot->unlocked_at)->format('Y-m-d') }}
+                                    </p>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
             @endif

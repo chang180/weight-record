@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreWeightRequest;
 use App\Http\Requests\UpdateWeightRequest;
 use App\Models\Weight;
+use App\Services\AchievementService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Cache;
@@ -17,6 +18,11 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class WeightController extends Controller
 {
+    public function __construct(
+        private AchievementService $achievementService
+    ) {
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -94,9 +100,20 @@ class WeightController extends Controller
 
         // 清除相關快取
         $this->clearUserWeightCache($user->id);
+        $user->clearWeightMilestonesCache();
+
+        // 檢查體重里程碑成就
+        $unlockedAchievements = $this->achievementService->checkWeightMilestones($user);
+
+        $achievementText = null;
+        if (count($unlockedAchievements) > 0) {
+            $achievementNames = array_map(fn($a) => $a->name, $unlockedAchievements);
+            $achievementText = implode('、', $achievementNames);
+        }
 
         return redirect()->route('dashboard')
-            ->with('success', '體重記錄已成功儲存');
+            ->with('success', '體重記錄已成功儲存')
+            ->with('achievement', $achievementText);
     }
 
     /**

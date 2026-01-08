@@ -34,11 +34,16 @@ class WeightGoalController extends Controller
      */
     public function store(StoreWeightGoalRequest $request): RedirectResponse
     {
+        $user = auth()->user();
+        
         // 停用其他活躍目標
-        auth()->user()->weightGoals()->update(['is_active' => false]);
+        $user->weightGoals()->update(['is_active' => false]);
         
         // 創建新目標
-        auth()->user()->weightGoals()->create($request->validated());
+        $user->weightGoals()->create($request->validated());
+
+        // 清除里程碑快取
+        $user->clearWeightMilestonesCache();
 
         return redirect()->route('goals.index')
             ->with('success', '體重目標設定成功！');
@@ -73,6 +78,9 @@ class WeightGoalController extends Controller
         
         $goal->update($request->validated());
 
+        // 清除里程碑快取
+        $goal->user->clearWeightMilestonesCache();
+
         return redirect()->route('goals.index')
             ->with('success', '體重目標更新成功！');
     }
@@ -97,11 +105,16 @@ class WeightGoalController extends Controller
     {
         $this->authorize('update', $goal);
         
+        $user = auth()->user();
+        
         // 停用其他活躍目標
-        auth()->user()->weightGoals()->update(['is_active' => false]);
+        $user->weightGoals()->update(['is_active' => false]);
         
         // 啟用選定目標
         $goal->update(['is_active' => true]);
+
+        // 清除里程碑快取
+        $user->clearWeightMilestonesCache();
 
         return redirect()->route('goals.index')
             ->with('success', '目標已設為活躍狀態！');

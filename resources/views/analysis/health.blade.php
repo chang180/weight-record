@@ -4,18 +4,24 @@
             🏥 健康指標分析
         </h2>
     </x-slot>
+
+    <div class="py-10 bg-gray-50 min-h-screen">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             @if(!isset($hasData) || $hasData)
                 <!-- BMI 指標卡片 -->
                 <div class="bg-white rounded-lg shadow-md p-8 mb-8">
                     <div class="text-center">
                         <div class="text-6xl mb-4">{{ $metrics['bmi_category']['icon'] }}</div>
                         <h3 class="text-3xl font-bold text-gray-900 mb-2">BMI: {{ $metrics['bmi'] }}</h3>
-                        <p class="text-xl font-semibold mb-2 
-                            @if($metrics['bmi_category']['color'] == 'green') text-green-600
-                            @elseif($metrics['bmi_category']['color'] == 'yellow') text-yellow-600
-                            @elseif($metrics['bmi_category']['color'] == 'red') text-red-600
-                            @else text-blue-600
-                            @endif">
+                        @php
+                            $colorClass = match($metrics['bmi_category']['color']) {
+                                'green' => 'text-green-600',
+                                'yellow' => 'text-yellow-600',
+                                'red' => 'text-red-600',
+                                default => 'text-blue-600',
+                            };
+                        @endphp
+                        <p class="text-xl font-semibold mb-2 {{ $colorClass }}">
                             {{ $metrics['bmi_category']['name'] }}
                         </p>
                         <p class="text-gray-600">{{ $metrics['bmi_category']['description'] }}</p>
@@ -56,7 +62,7 @@
                         </div>
                         
                         <div class="text-center">
-                            <div class="text-4xl mb-4">🏃‍♂️</div>
+                            <div class="text-4xl mb-4">🏃</div>
                             <h4 class="text-lg font-semibold text-gray-900 mb-3">運動建議</h4>
                             <p class="text-gray-600 leading-relaxed">{{ $metrics['health_advice']['運動建議'] }}</p>
                         </div>
@@ -83,17 +89,14 @@
                                 $targetWeight = $activeGoal->target_weight;
                                 $weightDifference = $currentWeight - $targetWeight;
                                 $daysRemaining = now()->diffInDays($activeGoal->target_date);
+                                $progressColorClass = $weightDifference > 0 ? 'text-red-600' : 'text-green-600';
                             @endphp
-                            
+
                             <div class="bg-gray-200 rounded-full h-4 mb-4">
                                 <div class="bg-indigo-600 h-4 rounded-full" style="width: {{ min(100, max(0, (abs($weightDifference) / max(abs($weightDifference), 1)) * 100)) }}%"></div>
                             </div>
-                            
-                            <p class="text-lg font-semibold 
-                                @if($weightDifference > 0) text-red-600
-                                @elseif($weightDifference < 0) text-green-600
-                                @else text-green-600
-                                @endif">
+
+                            <p class="text-lg font-semibold {{ $progressColorClass }}">
                                 @if($weightDifference > 0)
                                     還需要減重 {{ $weightDifference }} 公斤
                                 @elseif($weightDifference < 0)
@@ -126,7 +129,7 @@
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">< 18.5</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">&lt; 18.5</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">體重過輕</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">營養不良風險</td>
                                 </tr>

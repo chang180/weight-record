@@ -53,6 +53,30 @@
                             {{ __('健康') }}
                         </span>
                     </a>
+                    <a href="{{ route('daily-logs.index') }}" class="px-3 py-2 rounded-md {{ request()->routeIs('daily-logs.*') ? 'bg-purple-100 text-purple-700' : 'text-gray-700 hover:bg-gray-50 hover:text-purple-600' }} font-medium transition duration-200">
+                        <span class="flex items-center">
+                            📋
+                            <span class="ml-1">{{ __('任務') }}</span>
+                        </span>
+                    </a>
+                    <a href="{{ route('achievements.index') }}" class="px-3 py-2 rounded-md {{ request()->routeIs('achievements.*') ? 'bg-yellow-100 text-yellow-700' : 'text-gray-700 hover:bg-gray-50 hover:text-yellow-600' }} font-medium transition duration-200">
+                        <span class="flex items-center">
+                            🏆
+                            <span class="ml-1">{{ __('成就') }}</span>
+                        </span>
+                    </a>
+                    <a href="{{ route('rewards.index') }}" class="px-3 py-2 rounded-md {{ request()->routeIs('rewards.*') ? 'bg-green-100 text-green-700' : 'text-gray-700 hover:bg-gray-50 hover:text-green-600' }} font-medium transition duration-200">
+                        <span class="flex items-center">
+                            🎁
+                            <span class="ml-1">{{ __('獎勵') }}</span>
+                        </span>
+                    </a>
+                    <a href="{{ route('gamification.stats') }}" class="px-3 py-2 rounded-md {{ request()->routeIs('gamification.*') ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }} font-medium transition duration-200">
+                        <span class="flex items-center">
+                            📊
+                            <span class="ml-1">{{ __('統計') }}</span>
+                        </span>
+                    </a>
                     <a href="{{ route('profile.edit') }}" class="px-3 py-2 rounded-md {{ request()->routeIs('profile.edit') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600' }} font-medium transition duration-200">
                         <span class="flex items-center">
                             <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -107,6 +131,18 @@
             </a>
             <a href="{{ route('analysis.health') }}" class="block px-3 py-2 rounded-md {{ request()->routeIs('analysis.health') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600' }} font-medium">
                 {{ __('健康') }}
+            </a>
+            <a href="{{ route('daily-logs.index') }}" class="block px-3 py-2 rounded-md {{ request()->routeIs('daily-logs.*') ? 'bg-purple-100 text-purple-700' : 'text-gray-700 hover:bg-gray-50 hover:text-purple-600' }} font-medium">
+                📋 {{ __('任務') }}
+            </a>
+            <a href="{{ route('achievements.index') }}" class="block px-3 py-2 rounded-md {{ request()->routeIs('achievements.*') ? 'bg-yellow-100 text-yellow-700' : 'text-gray-700 hover:bg-gray-50 hover:text-yellow-600' }} font-medium">
+                🏆 {{ __('成就') }}
+            </a>
+            <a href="{{ route('rewards.index') }}" class="block px-3 py-2 rounded-md {{ request()->routeIs('rewards.*') ? 'bg-green-100 text-green-700' : 'text-gray-700 hover:bg-gray-50 hover:text-green-600' }} font-medium">
+                🎁 {{ __('獎勵') }}
+            </a>
+            <a href="{{ route('gamification.stats') }}" class="block px-3 py-2 rounded-md {{ request()->routeIs('gamification.*') ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600' }} font-medium">
+                📊 {{ __('統計') }}
             </a>
             <a href="{{ route('profile.edit') }}" class="block px-3 py-2 rounded-md {{ request()->routeIs('profile.edit') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600' }} font-medium">
                 {{ __('設定') }}
