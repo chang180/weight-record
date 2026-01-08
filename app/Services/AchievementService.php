@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\User;
 use App\Models\Achievement;
 use App\Models\DailyLog;
+use App\Models\Weight;
 use App\Services\PointsService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -350,6 +351,100 @@ class AchievementService
             ->count();
 
         if ($logs >= 30) {
+            $this->unlockAchievement($user, $achievement);
+            $unlocked[] = $achievement;
+        }
+    }
+
+    /**
+     * 檢查記錄體重成就
+     */
+    public function checkWeightRecordingAchievements(User $user): array
+    {
+        $unlocked = [];
+
+        // 取得連續記錄天數
+        $streak = $this->checkWeightRecordingStreak($user);
+
+        // 檢查「記錄習慣養成」（連續記錄 7 天）
+        $this->checkDailyRecorder7($user, $streak, $unlocked);
+
+        // 檢查「忠實記錄者」（連續記錄 30 天）
+        $this->checkDailyRecorder30($user, $streak, $unlocked);
+
+        return $unlocked;
+    }
+
+    /**
+     * 計算連續記錄體重的天數
+     */
+    private function checkWeightRecordingStreak(User $user): int
+    {
+        // 取得所有體重記錄的日期（唯一日期），按日期降冪排序
+        $recordDates = $user->weights()
+            ->selectRaw('DATE(record_at) as date')
+            ->distinct()
+            ->orderBy('date', 'DESC')
+            ->pluck('date')
+            ->map(function ($date) {
+                return Carbon::parse($date)->startOfDay();
+            })
+            ->values()
+            ->all();
+
+        if (empty($recordDates)) {
+            return 0;
+        }
+
+        // 從最新的記錄日期開始往前回溯，檢查連續記錄天數
+        $streak = 0;
+        $expectedDate = $recordDates[0]->copy(); // 從最新記錄日期開始
+        $dateIndex = 0;
+
+        while ($dateIndex < count($recordDates)) {
+            $recordDate = $recordDates[$dateIndex];
+
+            // 如果記錄日期與預期日期相同
+            if ($recordDate->equalTo($expectedDate)) {
+                $streak++;
+                $expectedDate->subDay(); // 預期下一天
+                $dateIndex++;
+            } else {
+                // 如果記錄日期與預期日期不同，表示有間斷，停止計算
+                break;
+            }
+        }
+
+        return $streak;
+    }
+
+    /**
+     * 檢查記錄習慣養成成就（連續記錄 7 天）
+     */
+    private function checkDailyRecorder7(User $user, int $streak, array &$unlocked): void
+    {
+        $achievement = Achievement::where('code', 'daily_recorder_7')->first();
+        if (!$achievement || $achievement->isUnlockedBy($user)) {
+            return;
+        }
+
+        if ($streak >= 7) {
+            $this->unlockAchievement($user, $achievement);
+            $unlocked[] = $achievement;
+        }
+    }
+
+    /**
+     * 檢查忠實記錄者成就（連續記錄 30 天）
+     */
+    private function checkDailyRecorder30(User $user, int $streak, array &$unlocked): void
+    {
+        $achievement = Achievement::where('code', 'daily_recorder_30')->first();
+        if (!$achievement || $achievement->isUnlockedBy($user)) {
+            return;
+        }
+
+        if ($streak >= 30) {
             $this->unlockAchievement($user, $achievement);
             $unlocked[] = $achievement;
         }

@@ -31,6 +31,7 @@ class ProfileController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'height' => ['nullable', 'numeric', 'min:100', 'max:250'],
+            'start_weight' => ['nullable', 'numeric', 'min:30', 'max:200'],
         ], [
             'name.required' => '姓名為必填項目',
             'name.max' => '姓名不能超過 255 個字符',
@@ -40,9 +41,15 @@ class ProfileController extends Controller
             'height.numeric' => '身高必須為數字',
             'height.min' => '身高不能少於 100 公分',
             'height.max' => '身高不能超過 250 公分',
+            'start_weight.numeric' => '起始體重必須為數字',
+            'start_weight.min' => '起始體重不能少於 30 公斤',
+            'start_weight.max' => '起始體重不能超過 200 公斤',
         ]);
 
-        $user->update($request->only(['name', 'email', 'height']));
+        $user->update($request->only(['name', 'email', 'height', 'start_weight']));
+
+        // 清除里程碑快取，因為起始體重改變會影響里程碑計算
+        $user->clearWeightMilestonesCache();
 
         return redirect()->route('profile.edit')
             ->with('success', '個人資料更新成功！');

@@ -19,6 +19,62 @@
                         </div>
                     @endif
 
+                    @if(session('points_deducted') && session('deduction_reason'))
+                        <div x-data="{ show: true }" 
+                             x-show="show"
+                             x-transition:enter="transition ease-out duration-500"
+                             x-transition:enter-start="opacity-0 transform translate-x-[-100px] scale-90"
+                             x-transition:enter-end="opacity-100 transform translate-x-0 scale-100"
+                             x-transition:leave="transition ease-in duration-300"
+                             x-transition:leave-start="opacity-100"
+                             x-transition:leave-end="opacity-0"
+                             @click.away="setTimeout(() => show = false, 5000)"
+                             class="mb-4 bg-gradient-to-r from-orange-500 to-red-500 border-2 border-orange-300 rounded-lg p-4 shadow-lg">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 text-4xl">⚠️</div>
+                                <div class="ml-4 flex-1">
+                                    <p class="text-lg font-bold text-white">積分扣除</p>
+                                    <p class="text-sm text-orange-100">
+                                        因{{ session('deduction_reason') }}，扣除 {{ session('points_deducted') }} 積分
+                                        @if(session('recording_reward'))
+                                            （記錄獎勵 +{{ session('recording_reward') }} 積分）
+                                        @endif
+                                    </p>
+                                </div>
+                                <button @click="show = false" class="text-white hover:text-orange-200">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if(session('recording_reward'))
+                        <div x-data="{ show: true }" 
+                             x-show="show"
+                             x-transition:enter="transition ease-out duration-500"
+                             x-transition:enter-start="opacity-0 transform translate-y-[-100px] scale-90"
+                             x-transition:enter-end="opacity-100 transform translate-y-0 scale-100"
+                             x-transition:leave="transition ease-in duration-300"
+                             x-transition:leave-start="opacity-100"
+                             x-transition:leave-end="opacity-0"
+                             @click.away="setTimeout(() => show = false, 5000)"
+                             class="mb-4 bg-gradient-to-r from-green-400 to-green-500 border-2 border-green-300 rounded-lg p-4 shadow-lg">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 text-4xl">✅</div>
+                                <div class="ml-4 flex-1">
+                                    <p class="text-lg font-bold text-white">記錄體重獲得 +{{ session('recording_reward') }} 積分</p>
+                                </div>
+                                <button @click="show = false" class="text-white hover:text-green-200">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    @endif
+
                     @if(session('achievement'))
                         <div x-data="{ show: true }" 
                              x-show="show"

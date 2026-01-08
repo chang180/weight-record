@@ -46,6 +46,8 @@ class AchievementSeeder extends Seeder
             ['code' => 'walk_master', 'name' => '散步狂人', 'icon' => '🚶', 'description' => '累積散步 100 次', 'points_reward' => 200],
             ['code' => 'early_bird', 'name' => '早睡冠軍', 'icon' => '😴', 'description' => '連續 30 天 11:00 前睡覺', 'points_reward' => 200],
             ['code' => 'fasting_master', 'name' => '斷食大師', 'icon' => '🍽️', 'description' => '連續 30 天只吃 1 餐', 'points_reward' => 300],
+            ['code' => 'daily_recorder_7', 'name' => '記錄習慣養成', 'icon' => '📝', 'description' => '連續記錄體重 7 天', 'points_reward' => 50],
+            ['code' => 'daily_recorder_30', 'name' => '忠實記錄者', 'icon' => '📋', 'description' => '連續記錄體重 30 天', 'points_reward' => 300],
         ];
 
         foreach ($specialAchievements as $achievement) {

@@ -32,9 +32,14 @@
                         <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
                             姓名 <span class="text-red-500">*</span>
                         </label>
+                        @php
+                            $nameClasses = $errors->has('name')
+                                ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                                : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500';
+                        @endphp
                         <input type="text" name="name" id="name" 
                                value="{{ old('name', $user->name) }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 @error('name') border-red-500 @enderror"
+                               class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 {{ $nameClasses }}"
                                placeholder="請輸入您的姓名"
                                required>
                         @error('name')
@@ -47,9 +52,14 @@
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
                             電子郵件 <span class="text-red-500">*</span>
                         </label>
+                        @php
+                            $emailClasses = $errors->has('email')
+                                ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                                : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500';
+                        @endphp
                         <input type="email" name="email" id="email" 
                                value="{{ old('email', $user->email) }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 @error('email') border-red-500 @enderror"
+                               class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 {{ $emailClasses }}"
                                placeholder="請輸入您的電子郵件"
                                required>
                         @error('email')
@@ -62,16 +72,44 @@
                         <label for="height" class="block text-sm font-medium text-gray-700 mb-2">
                             身高 (公分)
                         </label>
+                        @php
+                            $heightClasses = $errors->has('height')
+                                ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                                : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500';
+                        @endphp
                         <input type="number" name="height" id="height" 
                                value="{{ old('height', $user->height) }}"
                                step="0.1" min="100" max="250"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 @error('height') border-red-500 @enderror"
+                               class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 {{ $heightClasses }}"
                                placeholder="例如：170.5">
                         @error('height')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                         <p class="mt-1 text-sm text-gray-500">
                             設定身高後，健康指標分析將提供更準確的 BMI 計算和健康建議
+                        </p>
+                    </div>
+
+                    <!-- 起始體重 -->
+                    <div>
+                        <label for="start_weight" class="block text-sm font-medium text-gray-700 mb-2">
+                            起始體重 (公斤)
+                        </label>
+                        @php
+                            $startWeightClasses = $errors->has('start_weight')
+                                ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                                : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500';
+                        @endphp
+                        <input type="number" name="start_weight" id="start_weight" 
+                               value="{{ old('start_weight', $user->start_weight) }}"
+                               step="0.1" min="30" max="200"
+                               class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 {{ $startWeightClasses }}"
+                               placeholder="例如：75.5">
+                        @error('start_weight')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                        <p class="mt-1 text-sm text-gray-500">
+                            設定起始體重後，系統將根據此數值計算個人化的體重里程碑成就
                         </p>
                     </div>
 
@@ -92,6 +130,16 @@
                                 <span class="font-medium">
                                     @if($user->height)
                                         {{ $user->height }} 公分
+                                    @else
+                                        未設定
+                                    @endif
+                                </span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">起始體重：</span>
+                                <span class="font-medium">
+                                    @if($user->start_weight)
+                                        {{ $user->start_weight }} 公斤
                                     @else
                                         未設定
                                     @endif

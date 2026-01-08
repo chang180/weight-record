@@ -6,6 +6,7 @@ use App\Http\Requests\StoreWeightRequest;
 use App\Http\Requests\UpdateWeightRequest;
 use App\Models\Weight;
 use App\Services\AchievementService;
+use App\Services\PointsService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Cache;
@@ -15,11 +16,13 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 
 class WeightController extends Controller
 {
     public function __construct(
-        private AchievementService $achievementService
+        private AchievementService $achievementService,
+        private PointsService $pointsService
     ) {
     }
 
@@ -29,7 +32,7 @@ class WeightController extends Controller
     public function index(Request $request): View|\Illuminate\Http\RedirectResponse
     {
         $user = Auth::user();
-        
+
         // 檢查用戶是否已認證
         if (!$user) {
             return redirect()->route('login')->with('error', '請先登入');
@@ -74,7 +77,7 @@ class WeightController extends Controller
     {
         $data = $request->validated();
         $user = Auth::user();
-        
+
         // 檢查用戶是否已認證
         if (!$user || !$user->id) {
             Log::error('WeightController::store - 用戶未認證或 user_id 為空', [
@@ -83,10 +86,10 @@ class WeightController extends Controller
             ]);
             return redirect()->route('login')->with('error', '請先登入');
         }
-        
+
         // 確保 user_id 不為空
         $data['user_id'] = $user->id;
-        
+
         // 再次檢查 user_id 是否為空
         if (empty($data['user_id'])) {
             Log::error('WeightController::store - user_id 為空', [
@@ -102,18 +105,65 @@ class WeightController extends Controller
         $this->clearUserWeightCache($user->id);
         $user->clearWeightMilestonesCache();
 
-        // 檢查體重里程碑成就
+        // 步驟 1：檢查未記錄天數並扣除積分
+        $pointsDeducted = 0;
+        $deductionReason = null;
+
+        $recordDate = Carbon::parse($data['record_at']);
+        $lastWeight = $user->weights()
+            ->where('record_at', '<', $recordDate->format('Y-m-d'))
+            ->latest('record_at')
+            ->first();
+
+        if ($lastWeight) {
+            $lastDate = Carbon::parse($lastWeight->record_at);
+            $daysDiff = $lastDate->diffInDays($recordDate);
+
+            if ($daysDiff > 1) {
+                // 有漏記天數
+                $missedDays = $daysDiff - 1;
+                $pointsToDeduct = $missedDays * 10;
+
+                // 安全扣除積分（確保不會低於 0）
+                $pointsDeducted = $this->pointsService->deductPointsSafely($user, $pointsToDeduct);
+
+                if ($pointsDeducted > 0) {
+                    $deductionReason = "漏記 {$missedDays} 天體重";
+                }
+            }
+        }
+
+        // 步驟 2：給予記錄體重獎勵（固定 20 積分）
+        $this->pointsService->addPoints($user, 20, 'weight_recording');
+
+        // 步驟 3：檢查體重里程碑成就
         $unlockedAchievements = $this->achievementService->checkWeightMilestones($user);
 
+        // 步驟 4：檢查記錄體重成就
+        $recordingAchievements = $this->achievementService->checkWeightRecordingAchievements($user);
+        $unlockedAchievements = array_merge($unlockedAchievements, $recordingAchievements);
+
+        // 準備回應訊息
         $achievementText = null;
         if (count($unlockedAchievements) > 0) {
             $achievementNames = array_map(fn($a) => $a->name, $unlockedAchievements);
             $achievementText = implode('、', $achievementNames);
         }
 
-        return redirect()->route('dashboard')
+        $redirect = redirect()->route('dashboard')
             ->with('success', '體重記錄已成功儲存')
-            ->with('achievement', $achievementText);
+            ->with('recording_reward', 20);
+
+        if ($achievementText) {
+            $redirect->with('achievement', $achievementText);
+        }
+
+        if ($pointsDeducted > 0 && $deductionReason) {
+            $redirect->with('points_deducted', $pointsDeducted)
+                     ->with('deduction_reason', $deductionReason);
+        }
+
+        return $redirect;
     }
 
     /**
@@ -122,7 +172,7 @@ class WeightController extends Controller
     public function show(): View|\Illuminate\Http\RedirectResponse
     {
         $user = Auth::user();
-        
+
         // 檢查用戶是否已認證
         if (!$user || !$user->id) {
             return redirect()->route('login')->with('error', '請先登入');
@@ -146,7 +196,7 @@ class WeightController extends Controller
     {
         $data = $request->validated();
         $user = Auth::user();
-        
+
         // 檢查用戶是否已認證
         if (!$user || !$user->id) {
             Log::error('WeightController::update - 用戶未認證或 user_id 為空', [
@@ -155,10 +205,10 @@ class WeightController extends Controller
             ]);
             return redirect()->route('login')->with('error', '請先登入');
         }
-        
+
         // 確保 user_id 不為空
         $data['user_id'] = $user->id;
-        
+
         // 再次檢查 user_id 是否為空
         if (empty($data['user_id'])) {
             Log::error('WeightController::update - user_id 為空', [
@@ -204,7 +254,7 @@ class WeightController extends Controller
     public function latest(): \Illuminate\Http\JsonResponse
     {
         $user = Auth::user();
-        
+
         // 檢查用戶是否已認證
         if (!$user || !$user->id) {
             Log::error('WeightController::latest - 用戶未認證或 user_id 為空', [
@@ -260,18 +310,18 @@ class WeightController extends Controller
     public function exportCsv(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         $user = Auth::user();
-        
+
         // 檢查用戶是否已認證
         if (!$user || !$user->id) {
             abort(401, '請先登入');
         }
-        
+
         $weights = Weight::where('user_id', $user->id)
             ->orderBy('record_at', 'desc')
             ->get();
 
         $filename = 'weight_records_' . now()->format('Y-m-d') . '.csv';
-        
+
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
@@ -282,13 +332,13 @@ class WeightController extends Controller
 
         $callback = function() use ($weights) {
             $file = fopen('php://output', 'w');
-            
+
             // 添加 UTF-8 BOM 以支援中文
             fwrite($file, "\xEF\xBB\xBF");
-            
+
             // CSV 標題行（使用英文避免編碼問題）
             fputcsv($file, ['Date', 'Weight (kg)', 'Note', 'Recorded At']);
-            
+
             // 數據行
             foreach ($weights as $weight) {
                 fputcsv($file, [
@@ -298,7 +348,7 @@ class WeightController extends Controller
                     $weight->created_at->format('Y-m-d H:i:s'),
                 ]);
             }
-            
+
             fclose($file);
         };
 
@@ -311,18 +361,18 @@ class WeightController extends Controller
     public function exportPdf(Request $request)
     {
         $user = Auth::user();
-        
+
         // 檢查用戶是否已認證
         if (!$user || !$user->id) {
             abort(401, '請先登入');
         }
-        
+
         $weights = Weight::where('user_id', $user->id)
             ->orderBy('record_at', 'desc')
             ->get();
-        
+
         $pdf = Pdf::loadView('exports.weight-pdf', compact('weights', 'user'));
-        
+
         return $pdf->download('weight_records_' . now()->format('Y-m-d') . '.pdf');
     }
 
@@ -333,14 +383,14 @@ class WeightController extends Controller
     {
         try {
             $user = Auth::user();
-            
+
             // 檢查用戶是否已認證
             if (!$user || !$user->id) {
                 return redirect()->route('login')->with('error', '請先登入');
             }
-            
+
             $days = $request->get('days', 30); // 預設分析最近30天
-            
+
             $weights = Weight::where('user_id', $user->id)
                 ->where('record_at', '>=', now()->subDays($days))
                 ->orderBy('record_at', 'asc')
@@ -355,7 +405,7 @@ class WeightController extends Controller
 
             // 計算趨勢統計
             $analysis = $this->calculateTrendAnalysis($weights);
-            
+
             return view('analysis.trend', compact('weights', 'analysis', 'days'));
         } catch (\Exception $e) {
             // 記錄錯誤並返回錯誤頁面
@@ -364,7 +414,7 @@ class WeightController extends Controller
                 'days' => $request->get('days', 30),
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             return view('analysis.trend', [
                 'weights' => collect(),
                 'analysis' => [
@@ -404,10 +454,10 @@ class WeightController extends Controller
         $firstWeight = $weights->first()->weight;
         $lastWeight = $weights->last()->weight;
         $weightChange = $lastWeight - $firstWeight;
-        
+
         // 計算平均體重
         $averageWeight = $weights->avg('weight');
-        
+
         // 計算趨勢方向
         $trendDirection = 'stable';
         if ($weightChange > 0.5) {
@@ -415,25 +465,25 @@ class WeightController extends Controller
         } elseif ($weightChange < -0.5) {
             $trendDirection = 'decreasing';
         }
-        
+
         // 計算週變化
         $weeklyChange = 0;
         if ($weights->count() >= 7) {
             $weekAgo = $weights->where('record_at', '>=', now()->subDays(7))->first()?->weight ?? $firstWeight;
             $weeklyChange = $lastWeight - $weekAgo;
         }
-        
+
         // 計算月變化
         $monthlyChange = 0;
         if ($weights->count() >= 30) {
             $monthAgo = $weights->where('record_at', '>=', now()->subDays(30))->first()?->weight ?? $firstWeight;
             $monthlyChange = $lastWeight - $monthAgo;
         }
-        
+
         // 計算波動性（標準差）
         $weightsArray = $weights->pluck('weight')->toArray();
         $volatility = $this->calculateStandardDeviation($weightsArray);
-        
+
         // 計算一致性分數（基於記錄頻率）
         $totalDays = 1;
         if ($weights->count() > 0) {
@@ -441,18 +491,18 @@ class WeightController extends Controller
             $lastWeight = $weights->last();
             if ($firstWeight && $lastWeight && $firstWeight->record_at && $lastWeight->record_at) {
                 // 確保 record_at 是 Carbon 實例
-                $firstDate = $firstWeight->record_at instanceof \Carbon\Carbon 
-                    ? $firstWeight->record_at 
+                $firstDate = $firstWeight->record_at instanceof \Carbon\Carbon
+                    ? $firstWeight->record_at
                     : \Carbon\Carbon::parse($firstWeight->record_at);
-                $lastDate = $lastWeight->record_at instanceof \Carbon\Carbon 
-                    ? $lastWeight->record_at 
+                $lastDate = $lastWeight->record_at instanceof \Carbon\Carbon
+                    ? $lastWeight->record_at
                     : \Carbon\Carbon::parse($lastWeight->record_at);
-                
+
                 $totalDays = $firstDate->diffInDays($lastDate) + 1;
             }
         }
         $consistencyScore = min(100, ($weights->count() / $totalDays) * 100);
-        
+
         return [
             'total_records' => $weights->count(),
             'weight_change' => round($weightChange, 1),
@@ -472,12 +522,12 @@ class WeightController extends Controller
     {
         $count = count($values);
         if ($count < 2) return 0;
-        
+
         $mean = array_sum($values) / $count;
         $variance = array_sum(array_map(function($x) use ($mean) {
             return pow($x - $mean, 2);
         }, $values)) / $count;
-        
+
         return sqrt($variance);
     }
 
@@ -487,12 +537,12 @@ class WeightController extends Controller
     public function healthMetrics(Request $request): View|\Illuminate\Http\RedirectResponse
     {
         $user = Auth::user();
-        
+
         // 檢查用戶是否已認證
         if (!$user || !$user->id) {
             return redirect()->route('login')->with('error', '請先登入');
         }
-        
+
         // 獲取最新體重記錄
         $latestWeight = Weight::where('user_id', $user->id)
             ->orderBy('record_at', 'desc')
@@ -507,10 +557,10 @@ class WeightController extends Controller
 
         // 計算健康指標
         $metrics = $this->calculateHealthMetrics($latestWeight->weight);
-        
+
         // 獲取用戶的活躍目標
         $activeGoal = Auth::user()->activeWeightGoal;
-        
+
         return view('analysis.health', compact('metrics', 'activeGoal', 'latestWeight'));
     }
 
@@ -522,19 +572,19 @@ class WeightController extends Controller
         // 從用戶資料獲取身高，如果未設定則使用預設值
         $height = Auth::user()->height ?? 170; // cm
         $heightInMeters = $height / 100;
-        
+
         // 計算 BMI
         $bmi = $weight / ($heightInMeters * $heightInMeters);
-        
+
         // BMI 分類
         $bmiCategory = $this->getBmiCategory($bmi);
-        
+
         // 理想體重範圍
         $idealWeightRange = $this->getIdealWeightRange($height);
-        
+
         // 健康建議
         $healthAdvice = $this->getHealthAdvice($bmi, $bmiCategory);
-        
+
         return [
             'weight' => $weight,
             'height' => $height,
@@ -590,7 +640,7 @@ class WeightController extends Controller
         $heightInMeters = $height / 100;
         $minBmi = 18.5;
         $maxBmi = 24;
-        
+
         return [
             'min' => round($minBmi * $heightInMeters * $heightInMeters, 1),
             'max' => round($maxBmi * $heightInMeters * $heightInMeters, 1),
@@ -603,7 +653,7 @@ class WeightController extends Controller
     private function getHealthAdvice(float $bmi, array $category): array
     {
         $advice = [];
-        
+
         if ($bmi < 18.5) {
             $advice = [
                 '飲食建議' => '增加營養攝取，多吃高蛋白食物',
@@ -629,7 +679,7 @@ class WeightController extends Controller
                 '生活建議' => '建議諮詢醫生，制定減重計劃'
             ];
         }
-        
+
         return $advice;
     }
 }
