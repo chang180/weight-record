@@ -8,27 +8,19 @@
     <div class="py-10 bg-gray-50 min-h-screen">
         <div class="max-w-xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- 新增記錄表單 -->
-            <div class="bg-white shadow-lg rounded-xl overflow-hidden">
-                <div class="px-6 py-4 bg-indigo-600">
-                    <h3 class="text-lg font-bold text-white">新增體重記錄</h3>
+            @if (session('status'))
+                <div class="mb-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded">
+                    {{ session('status') }}
                 </div>
-                <div class="p-6">
-                    @if (session('status'))
-                        <div class="mb-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded">
-                            {{ session('status') }}
-                        </div>
-                    @endif
+            @endif
 
-                    @if (session('success'))
-                        <div class="mb-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded">
-                            {{ session('success') }}
-                        </div>
-                    @endif
-
-
-                    <livewire:weight-record-form />
+            @if (session('success'))
+                <div class="mb-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded">
+                    {{ session('success') }}
                 </div>
-            </div>
+            @endif
+
+            <livewire:weight-record-form />
 
             <!-- 體重目標設定 -->
             @php
