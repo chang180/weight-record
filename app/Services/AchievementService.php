@@ -347,7 +347,13 @@ class AchievementService
         $logs = $user->dailyLogs()
             ->where('date', '>=', $thirtyDaysAgo)
             ->where('task_meal', true)
-            ->whereRaw('DAYOFWEEK(date) BETWEEN 2 AND 6') // 只計算工作日
+            ->get()
+            ->filter(function ($log) {
+                // 只計算工作日（週一到週五）
+                // Carbon dayOfWeek: 0=週日, 1=週一, ..., 6=週六
+                $dayOfWeek = $log->date->dayOfWeek;
+                return $dayOfWeek >= 1 && $dayOfWeek <= 5;
+            })
             ->count();
 
         if ($logs >= 30) {

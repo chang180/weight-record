@@ -30,7 +30,7 @@ class WeeklyReportController extends Controller
             'next_week_goal' => $this->getNextWeekGoal($user, $weekEnd),
         ];
 
-        return view('reports.weekly', $stats);
+        return view('reports.weekly', array_merge($stats, ['weekStart' => $weekStart->format('Y-m-d')]));
     }
 
     /**

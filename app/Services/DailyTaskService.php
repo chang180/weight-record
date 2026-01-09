@@ -128,11 +128,17 @@ class DailyTaskService
         $weekEnd = $weekStart->copy()->endOfWeek();
         $points = 0;
 
-        // 工作日任務（週一到週五）
-        $workdayLogs = $user->dailyLogs()
+        // 取得本週所有記錄
+        $allLogs = $user->dailyLogs()
             ->whereBetween('date', [$weekStart, $weekEnd])
-            ->whereRaw('DAYOFWEEK(date) BETWEEN 2 AND 6') // 週一到週五
             ->get();
+
+        // 工作日任務（週一到週五）- 使用 Carbon 的 dayOfWeek 過濾
+        // Carbon dayOfWeek: 0=週日, 1=週一, ..., 6=週六
+        $workdayLogs = $allLogs->filter(function ($log) {
+            $dayOfWeek = $log->date->dayOfWeek;
+            return $dayOfWeek >= 1 && $dayOfWeek <= 5; // 週一到週五
+        });
 
         $completedWorkdays = $workdayLogs->filter(function ($log) {
             return $log->isAllTasksCompleted();
@@ -143,10 +149,10 @@ class DailyTaskService
         }
 
         // 假日任務（週六、週日）
-        $weekendLogs = $user->dailyLogs()
-            ->whereBetween('date', [$weekStart, $weekEnd])
-            ->whereRaw('DAYOFWEEK(date) IN (1, 7)') // 週日、週六
-            ->get();
+        $weekendLogs = $allLogs->filter(function ($log) {
+            $dayOfWeek = $log->date->dayOfWeek;
+            return $dayOfWeek === 0 || $dayOfWeek === 6; // 週日、週六
+        });
 
         $completedWeekends = $weekendLogs->filter(function ($log) {
             return $log->isAllTasksCompleted();

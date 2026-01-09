@@ -1,43 +1,60 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Livewire;
 
-use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Component;
 
-class MonthlyReportController extends Controller
+class MonthlyReport extends Component
 {
-    /**
-     * 顯示月報表
-     */
-    public function show(Request $request, ?string $month = null): View
+    public $monthStart = null;
+    public $monthEnd = null;
+    public $startWeight = null;
+    public $endWeight = null;
+    public $tasksCompleted = [];
+    public $pointsEarned = [];
+    public $achievementsUnlocked = [];
+    public $longestStreak = 0;
+    public $highlights = [];
+    public $suggestions = [];
+
+    public function mount(?string $month = null): void
     {
-        $user = auth()->user();
-        $monthStart = $month ? Carbon::parse($month)->startOfMonth() : Carbon::today()->startOfMonth();
-        $monthEnd = $monthStart->copy()->endOfMonth();
-
-        $stats = [
-            'month_start' => $monthStart,
-            'month_end' => $monthEnd,
-            'start_weight' => $this->getMonthStartWeight($user, $monthStart),
-            'end_weight' => $this->getMonthEndWeight($user, $monthEnd),
-            'tasks_completed' => $this->getTaskCompletion($user, $monthStart, $monthEnd),
-            'points_earned' => $this->getPointsEarned($user, $monthStart, $monthEnd),
-            'achievements_unlocked' => $this->getUnlockedAchievements($user, $monthStart, $monthEnd),
-            'longest_streak' => $user->longest_streak,
-            'highlights' => $this->getHighlights($user, $monthStart, $monthEnd),
-            'suggestions' => $this->getSuggestions($user, $monthStart, $monthEnd),
-        ];
-
-        return view('reports.monthly', array_merge($stats, ['month' => $monthStart->format('Y-m')]));
+        $this->monthStart = $month 
+            ? Carbon::parse($month)->startOfMonth() 
+            : Carbon::today()->startOfMonth();
+        $this->loadStats();
     }
 
-    /**
-     * 取得月開始體重
-     */
-    private function getMonthStartWeight(User $user, Carbon $monthStart): ?float
+    public function previousMonth(): void
+    {
+        $this->monthStart = $this->monthStart->copy()->subMonth();
+        $this->loadStats();
+    }
+
+    public function nextMonth(): void
+    {
+        $this->monthStart = $this->monthStart->copy()->addMonth();
+        $this->loadStats();
+    }
+
+    private function loadStats(): void
+    {
+        $user = Auth::user();
+        $this->monthEnd = $this->monthStart->copy()->endOfMonth();
+
+        $this->startWeight = $this->getMonthStartWeight($user, $this->monthStart);
+        $this->endWeight = $this->getMonthEndWeight($user, $this->monthEnd);
+        $this->tasksCompleted = $this->getTaskCompletion($user, $this->monthStart, $this->monthEnd);
+        $this->pointsEarned = $this->getPointsEarned($user, $this->monthStart, $this->monthEnd);
+        $this->achievementsUnlocked = $this->getUnlockedAchievements($user, $this->monthStart, $this->monthEnd);
+        $this->longestStreak = $user->longest_streak;
+        $this->highlights = $this->getHighlights($user, $this->monthStart, $this->monthEnd);
+        $this->suggestions = $this->getSuggestions($user, $this->monthStart, $this->monthEnd);
+    }
+
+    private function getMonthStartWeight($user, Carbon $monthStart): ?float
     {
         return $user->dailyLogs()
             ->where('date', '>=', $monthStart)
@@ -46,10 +63,7 @@ class MonthlyReportController extends Controller
             ->first()?->weight;
     }
 
-    /**
-     * 取得月結束體重
-     */
-    private function getMonthEndWeight(User $user, Carbon $monthEnd): ?float
+    private function getMonthEndWeight($user, Carbon $monthEnd): ?float
     {
         return $user->dailyLogs()
             ->where('date', '<=', $monthEnd)
@@ -58,10 +72,7 @@ class MonthlyReportController extends Controller
             ->first()?->weight;
     }
 
-    /**
-     * 取得任務完成統計
-     */
-    private function getTaskCompletion(User $user, Carbon $monthStart, Carbon $monthEnd): array
+    private function getTaskCompletion($user, Carbon $monthStart, Carbon $monthEnd): array
     {
         $logs = $user->dailyLogs()
             ->whereBetween('date', [$monthStart, $monthEnd])
@@ -75,10 +86,7 @@ class MonthlyReportController extends Controller
         ];
     }
 
-    /**
-     * 取得獲得積分
-     */
-    private function getPointsEarned(User $user, Carbon $monthStart, Carbon $monthEnd): array
+    private function getPointsEarned($user, Carbon $monthStart, Carbon $monthEnd): array
     {
         $logs = $user->dailyLogs()
             ->whereBetween('date', [$monthStart, $monthEnd])
@@ -91,10 +99,7 @@ class MonthlyReportController extends Controller
         ];
     }
 
-    /**
-     * 取得解鎖成就
-     */
-    private function getUnlockedAchievements(User $user, Carbon $monthStart, Carbon $monthEnd): array
+    private function getUnlockedAchievements($user, Carbon $monthStart, Carbon $monthEnd): array
     {
         return $user->achievements()
             ->wherePivotBetween('unlocked_at', [$monthStart, $monthEnd])
@@ -102,10 +107,7 @@ class MonthlyReportController extends Controller
             ->toArray();
     }
 
-    /**
-     * 取得本月亮點
-     */
-    private function getHighlights(User $user, Carbon $monthStart, Carbon $monthEnd): array
+    private function getHighlights($user, Carbon $monthStart, Carbon $monthEnd): array
     {
         $highlights = [];
         $logs = $user->dailyLogs()
@@ -136,10 +138,7 @@ class MonthlyReportController extends Controller
         return $highlights;
     }
 
-    /**
-     * 取得建議
-     */
-    private function getSuggestions(User $user, Carbon $monthStart, Carbon $monthEnd): array
+    private function getSuggestions($user, Carbon $monthStart, Carbon $monthEnd): array
     {
         $suggestions = [];
         $logs = $user->dailyLogs()
@@ -168,5 +167,10 @@ class MonthlyReportController extends Controller
         }
 
         return $suggestions;
+    }
+
+    public function render()
+    {
+        return view('livewire.monthly-report');
     }
 }

@@ -18,6 +18,8 @@
         @else
             @vite(['resources/css/app.css', 'resources/js/app.js'])
         @endif
+        
+        @livewireStyles
 
         <!-- 備用樣式，確保基本顯示正常 -->
         <style>
@@ -94,5 +96,7 @@
                 {{ $slot }}
             </main>
         </div>
+        
+        @livewireScripts
     </body>
 </html>

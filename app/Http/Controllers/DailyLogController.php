@@ -61,7 +61,7 @@ class DailyLogController extends Controller
     {
         $validated = $request->validate([
             'weight' => 'nullable|numeric|min:0|max:300',
-            'note' => 'nullable|string|max:1000',
+            'notes' => 'nullable|string|max:1000',
         ]);
 
         return DB::transaction(function () use ($validated) {
@@ -77,8 +77,8 @@ class DailyLogController extends Controller
             if (isset($validated['weight'])) {
                 $dailyLog->weight = $validated['weight'];
             }
-            if (isset($validated['note'])) {
-                $dailyLog->note = $validated['note'];
+            if (isset($validated['notes'])) {
+                $dailyLog->notes = !empty($validated['notes']) ? $validated['notes'] : null;
             }
 
             // 計算每日積分
