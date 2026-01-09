@@ -77,49 +77,46 @@
                 </div>
             </div>
 
-            <!-- 今日任務清單 -->
-            <div class="bg-white shadow-lg rounded-xl overflow-hidden mb-6">
-                <div class="px-6 py-4 bg-indigo-600">
-                    <h3 class="text-lg font-bold text-white">
-                        {{ $isWeekend ? '🎉 週末任務' : '💼 工作日任務' }}
-                        <span class="text-indigo-200 text-sm ml-2">{{ now()->format('Y-m-d') }}</span>
-                    </h3>
-                    @php
-                        $completedCount = collect($tasks)->filter(fn($t) => $t['completed'])->count();
-                        $totalCount = count($tasks);
-                        $progress = $totalCount > 0 ? ($completedCount / $totalCount) * 100 : 0;
-                    @endphp
-                    <div class="mt-2">
-                        <div class="flex justify-between text-xs text-indigo-200 mb-1">
-                            <span>進度</span>
-                            <span>{{ $completedCount }} / {{ $totalCount }}</span>
-                        </div>
-                        <div class="w-full bg-indigo-300 rounded-full h-2">
-                            <div class="bg-yellow-400 h-2 rounded-full transition-all duration-500 ease-out" 
-                                 style="width: {{ $progress }}%"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-6">
-                    @if($errors->any())
-                        <div class="mb-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
-                            <ul class="list-disc list-inside">
-                                @foreach($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
 
-                    <div x-data="{
-                        tasks: @js($tasks),
-                        dailyLogId: {{ $dailyLog?->id ?? 'null' }},
-                        dailyPoints: {{ $dailyLog->daily_points ?? 0 }},
-                        allCompleted: false,
-                        checkAllCompleted() {
-                            this.allCompleted = Object.values(this.tasks).every(t => t.completed);
-                        },
-                        toggleTask(taskKey) {
+            <!-- 今日任務清單 -->
+            <div class="bg-white shadow-lg rounded-xl overflow-hidden mb-6" 
+                 x-data="{
+                     tasks: @js($tasks),
+                     dailyLogId: {{ $dailyLog?->id ?? 'null' }},
+                     dailyPoints: {{ $dailyLog->daily_points ?? 0 }},
+                     allCompleted: false,
+                     get completedCount() {
+                         if (!this.tasks) return 0;
+                         const tasksArray = Object.values(this.tasks);
+                         return tasksArray.filter(t => {
+                             if (!t) return false;
+                             // 確保正確處理布林值（包括 true, 1, '1' 等）
+                             return t.completed === true || t.completed === 1 || t.completed === '1';
+                         }).length;
+                     },
+                     get totalCount() {
+                         return this.tasks ? Object.keys(this.tasks).length : 0;
+                     },
+                     get progress() {
+                         return this.totalCount > 0 ? (this.completedCount / this.totalCount) * 100 : 0;
+                     },
+                     checkAllCompleted() {
+                         if (!this.tasks) {
+                             this.allCompleted = false;
+                             return;
+                         }
+                         const tasksArray = Object.values(this.tasks);
+                         if (tasksArray.length === 0) {
+                             this.allCompleted = false;
+                             return;
+                         }
+                         const completedTasks = tasksArray.filter(t => {
+                             if (!t) return false;
+                             return t.completed === true || t.completed === 1 || t.completed === '1';
+                         });
+                         this.allCompleted = completedTasks.length === tasksArray.length;
+                     },
+                     toggleTask(taskKey) {
                             if (!this.dailyLogId) {
                                 alert('請先建立今日記錄');
                                 return;
@@ -154,41 +151,109 @@
                                 }
                             });
                         },
-                        init() {
-                            this.checkAllCompleted();
-                        }
-                    }" class="space-y-3">
-                        <template x-for="(task, key) in tasks" :key="key">
-                            <div class="flex items-center p-4 border rounded-lg transition-all duration-300 cursor-pointer"
-                                 :class="task.completed ? 'bg-green-50 border-green-300 shadow-md' : 'bg-white border-gray-200 hover:bg-gray-50'"
-                                 @click="toggleTask(key)">
+                     init() {
+                         this.checkAllCompleted();
+                     }
+                 }">
+                <div class="px-6 py-4 bg-indigo-600">
+                    <h3 class="text-lg font-bold text-white">
+                        {{ $isWeekend ? '🎉 週末任務' : '💼 工作日任務' }}
+                        <span class="text-indigo-200 text-sm ml-2">{{ now()->format('Y-m-d') }}</span>
+                    </h3>
+                    <div class="mt-2">
+                        <div class="flex justify-between text-xs text-indigo-200 mb-1">
+                            <span>進度</span>
+                            <span x-text="completedCount + ' / ' + totalCount">{{ collect($tasks)->filter(fn($t) => $t['completed'] ?? false)->count() }} / {{ count($tasks) }}</span>
+                        </div>
+                        <div class="w-full bg-indigo-300 rounded-full h-2">
+                            <div class="bg-yellow-400 h-2 rounded-full transition-all duration-500 ease-out" 
+                                 :style="'width: ' + progress + '%'"
+                                 style="width: {{ collect($tasks)->filter(fn($t) => $t['completed'] ?? false)->count() / max(count($tasks), 1) * 100 }}%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    @if($errors->any())
+                        <div class="mb-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
+                            <ul class="list-disc list-inside">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <div class="space-y-3">
+                        @if(!$dailyLog)
+                            <div class="mb-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 text-2xl mr-3">⚠️</div>
+                                    <div class="flex-1">
+                                        <p class="text-yellow-800 font-semibold mb-1">請先建立今日記錄</p>
+                                        <p class="text-yellow-700 text-sm">
+                                            請先在下方的「今日體重記錄」區域建立記錄，然後就可以開始完成任務了！
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        @else
+                            <div class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 text-2xl mr-3">💡</div>
+                                    <div class="flex-1">
+                                        <p class="text-blue-800 font-semibold mb-1">如何完成任務</p>
+                                        <p class="text-blue-700 text-sm">
+                                            點擊下方的任務項目即可切換完成狀態。完成的任務會變成綠色並顯示 ✓ 標記。
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                        @foreach($tasks as $taskKey => $task)
+                            <div class="flex items-center p-4 border-2 rounded-lg transition-all duration-300 cursor-pointer group task-item"
+                                 data-task-key="{{ $taskKey }}"
+                                 :class="tasks['{{ $taskKey }}']?.completed ? 'bg-green-50 border-green-400 shadow-md' : 'bg-white border-gray-300 hover:border-indigo-400 hover:bg-indigo-50 hover:shadow-md'"
+                                 @click="toggleTask('{{ $taskKey }}')"
+                                 :title="tasks['{{ $taskKey }}']?.completed ? '點擊取消完成' : '點擊標記為完成'">
                                 <div class="flex-shrink-0 mr-4 relative">
-                                    <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300"
-                                         :class="task.completed ? 'bg-green-500 border-green-500 scale-110' : 'border-gray-300'">
-                                        <svg x-show="task.completed" 
+                                    <div class="w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-300"
+                                         :class="tasks['{{ $taskKey }}']?.completed ? 'bg-green-500 border-green-600 scale-110' : 'border-gray-400 group-hover:border-indigo-500'">
+                                        <svg x-show="tasks['{{ $taskKey }}']?.completed" 
                                              x-transition:enter="transition ease-out duration-300"
                                              x-transition:enter-start="opacity-0 scale-0"
                                              x-transition:enter-end="opacity-100 scale-100"
-                                             class="w-4 h-4 text-white" 
+                                             class="w-5 h-5 text-white" 
                                              fill="currentColor" 
                                              viewBox="0 0 20 20">
                                             <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                                         </svg>
+                                        <svg x-show="!tasks['{{ $taskKey }}']?.completed" 
+                                             class="w-4 h-4 text-gray-400 group-hover:text-indigo-500" 
+                                             fill="none" 
+                                             stroke="currentColor" 
+                                             viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                        </svg>
                                     </div>
                                 </div>
                                 <div class="flex-1">
-                                    <p class="font-semibold transition-colors duration-300" 
-                                       :class="task.completed ? 'text-green-700' : 'text-gray-800'"
-                                       x-text="task.name"></p>
-                                    <p class="text-sm text-gray-500" x-text="task.description"></p>
+                                    <p class="font-semibold transition-colors duration-300 mb-1" 
+                                       :class="tasks['{{ $taskKey }}']?.completed ? 'text-green-700' : 'text-gray-800 group-hover:text-indigo-700'">
+                                        {{ $task['name'] }}
+                                    </p>
+                                    <p class="text-sm transition-colors duration-300" 
+                                       :class="tasks['{{ $taskKey }}']?.completed ? 'text-green-600' : 'text-gray-500 group-hover:text-gray-700'">
+                                        {{ $task['description'] }}
+                                    </p>
                                 </div>
                                 <div class="flex-shrink-0 ml-4">
-                                    <span class="text-2xl transition-transform duration-300"
-                                          :class="task.completed ? 'scale-125' : ''"
-                                          x-text="task.icon"></span>
+                                    <span class="text-3xl transition-transform duration-300"
+                                          :class="tasks['{{ $taskKey }}']?.completed ? 'scale-125' : 'group-hover:scale-110'">
+                                        {{ $task['icon'] }}
+                                    </span>
                                 </div>
                             </div>
-                        </template>
+                        @endforeach
                         
                         <div x-show="allCompleted" 
                              x-transition:enter="transition ease-out duration-500"

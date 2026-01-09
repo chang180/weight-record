@@ -77,8 +77,8 @@
                             <div class="space-y-4">
                                 @php
                                     $daysLeft = now()->diffInDays($goal->target_date, false);
-                                    $totalDays = $goal->created_at->diffInDays($goal->target_date);
-                                    $daysPassed = $goal->created_at->diffInDays(now());
+                                    $totalDays = (int) round($goal->created_at->diffInDays($goal->target_date));
+                                    $daysPassed = (int) round($goal->created_at->diffInDays(now()));
                                     $progressPercentage = $totalDays > 0 ? min(100, ($daysPassed / $totalDays) * 100) : 0;
                                 @endphp
                                 

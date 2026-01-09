@@ -99,6 +99,18 @@ class WeightController extends Controller
             return redirect()->route('login')->with('error', '認證錯誤，請重新登入');
         }
 
+        $recordDate = Carbon::parse($data['record_at']);
+
+        // 檢查同一天是否已有記錄
+        $existingWeight = Weight::where('user_id', $user->id)
+            ->whereDate('record_at', $recordDate->format('Y-m-d'))
+            ->first();
+
+        if ($existingWeight) {
+            return redirect()->route('dashboard')
+                ->withErrors(['record_at' => '該日期已經記錄過體重了，請編輯現有記錄。']);
+        }
+
         $weight = Weight::create($data);
 
         // 清除相關快取
@@ -108,8 +120,9 @@ class WeightController extends Controller
         // 步驟 1：檢查未記錄天數並扣除積分
         $pointsDeducted = 0;
         $deductionReason = null;
+        $pointsToDeduct = 0;
+        $missedDays = 0;
 
-        $recordDate = Carbon::parse($data['record_at']);
         $lastWeight = $user->weights()
             ->where('record_at', '<', $recordDate->format('Y-m-d'))
             ->latest('record_at')
@@ -133,8 +146,13 @@ class WeightController extends Controller
             }
         }
 
-        // 步驟 2：給予記錄體重獎勵（固定 20 積分）
-        $this->pointsService->addPoints($user, 20, 'weight_recording');
+        // 步驟 2：給予記錄體重獎勵（只有今天的記錄才給獎勵）
+        $isToday = $recordDate->isToday();
+        $recordingReward = 0;
+        if ($isToday) {
+            $this->pointsService->addPoints($user, 20, 'weight_recording');
+            $recordingReward = 20;
+        }
 
         // 步驟 3：檢查體重里程碑成就
         $unlockedAchievements = $this->achievementService->checkWeightMilestones($user);
@@ -151,16 +169,28 @@ class WeightController extends Controller
         }
 
         $redirect = redirect()->route('dashboard')
-            ->with('success', '體重記錄已成功儲存')
-            ->with('recording_reward', 20);
+            ->with('success', '體重記錄已成功儲存');
+
+        if ($recordingReward > 0) {
+            $redirect->with('recording_reward', $recordingReward);
+        }
 
         if ($achievementText) {
             $redirect->with('achievement', $achievementText);
         }
 
+        // 傳遞詳細的懲罰資訊
         if ($pointsDeducted > 0 && $deductionReason) {
             $redirect->with('points_deducted', $pointsDeducted)
+                     ->with('points_to_deduct', $pointsToDeduct)
+                     ->with('missed_days', $missedDays)
                      ->with('deduction_reason', $deductionReason);
+
+            // 如果積分不足，顯示還欠多少
+            if ($pointsDeducted < $pointsToDeduct) {
+                $remainingDebt = $pointsToDeduct - $pointsDeducted;
+                $redirect->with('points_debt', $remainingDebt);
+            }
         }
 
         return $redirect;
@@ -236,6 +266,13 @@ class WeightController extends Controller
         $user = Auth::user();
         if (!$user || $weight->user_id !== $user->id) {
             abort(403);
+        }
+
+        // 檢查是否為今天的記錄，如果是則扣除獎勵積分（防刷分）
+        $recordDate = Carbon::parse($weight->record_at);
+        if ($recordDate->isToday() && $weight->created_at->isToday()) {
+            // 扣除 20 積分（如果之前有給獎勵）
+            $this->pointsService->deductPointsSafely($user, 20);
         }
 
         $user_id = $weight->user_id;

@@ -24,8 +24,14 @@ class WeightGoalController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(): View
+    public function create(): View|RedirectResponse
     {
+        $activeGoal = auth()->user()->activeWeightGoal;
+        if ($activeGoal) {
+            return redirect()->route('goals.edit', $activeGoal)
+                ->with('info', '您已有活躍目標，請編輯現有目標或先停用。');
+        }
+
         return view('goals.create');
     }
 

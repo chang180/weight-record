@@ -42,7 +42,7 @@ class DailyLogController extends Controller
                 'name' => $task['name'],
                 'description' => $task['description'],
                 'icon' => $task['icon'],
-                'completed' => $dailyLog ? $dailyLog->{$task['key']} : false,
+                'completed' => $dailyLog ? (bool) $dailyLog->{$task['key']} : false,
             ];
         }
 

@@ -284,8 +284,8 @@ class WeightRecordingRewardTest extends TestCase
             'record_at' => Carbon::today()->subDays(8)->format('Y-m-d'),
         ]);
 
-        // 創建連續 6 天的記錄（從 7 天前開始）
-        for ($i = 6; $i >= 0; $i--) {
+        // 創建連續 6 天的記錄（從 6 天前開始，不包括今天）
+        for ($i = 6; $i >= 1; $i--) {
             Weight::factory()->create([
                 'user_id' => $user->id,
                 'record_at' => Carbon::today()->subDays($i)->format('Y-m-d'),

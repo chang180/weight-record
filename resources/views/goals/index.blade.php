@@ -4,10 +4,17 @@
             <h2 class="font-bold text-2xl text-indigo-700 tracking-tight">
                 🎯 我的體重目標
             </h2>
-            <a href="{{ route('goals.create') }}" 
-               class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition duration-300">
-                設定新目標
-            </a>
+            @if(!auth()->user()->activeWeightGoal)
+                <a href="{{ route('goals.create') }}" 
+                   class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition duration-300">
+                    設定新目標
+                </a>
+            @else
+                <a href="{{ route('goals.edit', auth()->user()->activeWeightGoal) }}" 
+                   class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300">
+                    編輯活躍目標
+                </a>
+            @endif
         </div>
     </x-slot>
 
@@ -64,7 +71,7 @@
                                             <p class="text-sm text-gray-500">進度</p>
                                             <p class="text-lg font-semibold text-gray-900">
                                                 @php
-                                                    $daysLeft = now()->diffInDays($goal->target_date, false);
+                                                    $daysLeft = (int) round(now()->diffInDays($goal->target_date, false));
                                                     if ($daysLeft > 0) {
                                                         echo $daysLeft . ' 天';
                                                     } else {

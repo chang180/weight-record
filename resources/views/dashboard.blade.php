@@ -42,6 +42,11 @@
                                     <p class="text-lg font-bold text-white">積分扣除</p>
                                     <p class="text-sm text-orange-100">
                                         因{{ session('deduction_reason') }}，扣除 {{ session('points_deducted') }} 積分
+                                        @if(session('points_to_deduct') && session('points_deducted') < session('points_to_deduct'))
+                                            （應扣 {{ session('points_to_deduct') }} 積分，因積分不足僅扣除 {{ session('points_deducted') }} 積分，尚欠 {{ session('points_debt') }} 積分）
+                                        @elseif(session('points_to_deduct'))
+                                            （應扣 {{ session('points_to_deduct') }} 積分）
+                                        @endif
                                         @if(session('recording_reward'))
                                             （記錄獎勵 +{{ session('recording_reward') }} 積分）
                                         @endif
