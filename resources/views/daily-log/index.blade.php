@@ -5,7 +5,7 @@
         </h2>
     </x-slot>
 
-    <div class="py-10 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen">
+    <div class="py-10 bg-gray-50 min-h-screen">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <livewire:daily-task-list />
         </div>

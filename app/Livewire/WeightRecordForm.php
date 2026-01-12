@@ -3,8 +3,10 @@
 namespace App\Livewire;
 
 use App\Models\Weight;
+use App\Models\DailyLog;
 use App\Services\AchievementService;
 use App\Services\PointsService;
+use App\Services\DailyTaskService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -25,13 +27,16 @@ class WeightRecordForm extends Component
     
     protected AchievementService $achievementService;
     protected PointsService $pointsService;
+    protected DailyTaskService $taskService;
 
     public function boot(
         AchievementService $achievementService,
-        PointsService $pointsService
+        PointsService $pointsService,
+        DailyTaskService $taskService
     ): void {
         $this->achievementService = $achievementService;
         $this->pointsService = $pointsService;
+        $this->taskService = $taskService;
     }
 
     public function mount(): void
@@ -90,6 +95,29 @@ class WeightRecordForm extends Component
             'record_at' => $this->record_at,
             'note' => !empty($this->note) ? $this->note : null,
         ]);
+
+        // 同步更新 daily_logs 表（如果是今天的記錄）
+        if ($recordDate->isToday()) {
+            $dailyLog = $user->dailyLogs()->firstOrNew([
+                'date' => $recordDate,
+            ]);
+
+            $dailyLog->weight = $this->weight;
+            if (!empty($this->note)) {
+                $dailyLog->notes = $this->note;
+            }
+
+            // 計算每日積分
+            $dailyLog->daily_points = $this->taskService->calculateDailyPoints($dailyLog);
+
+            // 如果是週日，計算週任務積分
+            if ($recordDate->dayOfWeek === 0) {
+                $weekStart = $recordDate->copy()->startOfWeek();
+                $dailyLog->weekly_points = $this->taskService->calculateWeeklyPoints($user, $weekStart);
+            }
+
+            $dailyLog->save();
+        }
 
         // 清除相關快取
         $this->clearUserWeightCache($user->id);

@@ -77,10 +77,13 @@ class GamificationStatsTest extends TestCase
         $user = User::factory()->create();
         assert($user instanceof User);
 
-        // 創建完成的記錄
+        // 設定為工作日（週三）以確保測試穩定
+        Carbon::setTestNow(Carbon::parse('2024-01-10')); // 週三
+
+        // 創建完成的記錄（週一，工作日）
         DailyLog::factory()->create([
             'user_id' => $user->id,
-            'date' => Carbon::today()->subDays(2),
+            'date' => Carbon::today()->subDays(2), // 週一
             'task_meal' => true,
             'task_walk' => true,
             'task_no_snack' => true,
@@ -88,10 +91,10 @@ class GamificationStatsTest extends TestCase
             'daily_points' => 50,
         ]);
 
-        // 創建部分完成的記錄
+        // 創建部分完成的記錄（週二，工作日）
         DailyLog::factory()->create([
             'user_id' => $user->id,
-            'date' => Carbon::today()->subDays(1),
+            'date' => Carbon::today()->subDays(1), // 週二
             'task_meal' => true,
             'task_walk' => false,
             'task_no_snack' => true,
@@ -104,6 +107,9 @@ class GamificationStatsTest extends TestCase
             ->set('days', 7)
             ->assertSet('completionData.completed', 1)
             ->assertSet('completionData.partial', 1);
+
+        // 恢復時間
+        Carbon::setTestNow();
     }
 
     public function test_calculates_streak_trend(): void

@@ -236,24 +236,29 @@ class DailyTaskListTest extends TestCase
         $user = User::factory()->create([
             'current_streak' => 0,
         ]);
-        
-        // 創建昨天的完美記錄
+
+        // 確保測試在工作日進行（週一到週五）
+        Carbon::setTestNow(Carbon::parse('2024-01-08')); // 2024-01-08 是週一
+
+        // 創建昨天（週日，週末）的完美記錄
         DailyLog::factory()->create([
             'user_id' => $user->id,
-            'date' => Carbon::yesterday(),
-            'task_meal' => true,
-            'task_walk' => true,
-            'task_no_snack' => true,
-            'task_sleep' => true,
-        ]);
-
-        $dailyLog = DailyLog::factory()->create([
-            'user_id' => $user->id,
-            'date' => Carbon::today(),
+            'date' => Carbon::yesterday(), // 週日
             'task_meal' => true,
             'task_walk' => true,
             'task_no_snack' => true,
             'task_sleep' => false,
+            'task_no_sugar' => true, // 週日任務
+        ]);
+
+        // 創建今天（週一，工作日）的記錄
+        $dailyLog = DailyLog::factory()->create([
+            'user_id' => $user->id,
+            'date' => Carbon::today(), // 週一
+            'task_meal' => true,
+            'task_walk' => true,
+            'task_no_snack' => true,
+            'task_sleep' => false, // 最後一個未完成的任務
         ]);
 
         Livewire::actingAs($user)
@@ -262,6 +267,9 @@ class DailyTaskListTest extends TestCase
 
         $user->refresh();
         $this->assertEquals(2, $user->current_streak); // 昨天 + 今天
+
+        // 恢復時間
+        Carbon::setTestNow();
     }
 
     public function test_weight_record_form_validation(): void

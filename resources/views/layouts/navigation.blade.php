@@ -1,4 +1,4 @@
-<nav class="bg-white/95 backdrop-blur-sm border-b border-gray-200/50 shadow-sm sticky top-0 z-50">
+<nav class="nav-header bg-white/98 backdrop-blur-md border-b border-gray-200/80 sticky top-0 z-50 transition-all duration-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
             <!-- Logo & Links -->
@@ -164,8 +164,8 @@
     </div>
 
     <!-- Mobile menu -->
-    <div class="mobile-menu hidden lg:hidden border-t border-gray-200 bg-white/98 backdrop-blur-sm max-h-[calc(100vh-4rem)] overflow-y-auto">
-        <div class="px-4 pt-4 pb-2 space-y-1">
+    <div class="mobile-menu hidden lg:hidden border-t border-gray-200/80 shadow-lg">
+        <div class="px-4 pt-4 pb-2 space-y-1 max-h-[calc(100vh-4rem)] overflow-y-auto overscroll-contain">
             <!-- 主要功能區塊 -->
             <div class="mb-4">
                 <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-3">主要功能</div>
@@ -274,9 +274,102 @@
     .scrollbar-hide::-webkit-scrollbar {
         display: none;
     }
+
+    /* 導航列樣式 */
+    .nav-header {
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    .nav-header.scrolled {
+        background-color: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(16px) saturate(180%);
+        -webkit-backdrop-filter: blur(16px) saturate(180%);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        border-bottom-color: rgba(229, 231, 235, 0.8);
+    }
+
+    /* 為導航列添加漸變遮罩效果 */
+    .nav-header::after {
+        content: '';
+        position: absolute;
+        bottom: -20px;
+        left: 0;
+        right: 0;
+        height: 20px;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .nav-header.scrolled::after {
+        opacity: 1;
+    }
+
+    /* 改善行動裝置滾動體驗 */
+    .mobile-menu {
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
+        background-color: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+    }
+
+    .mobile-menu > div {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* 防止背景滾動 */
+    body.menu-open {
+        overflow: hidden;
+        position: fixed;
+        width: 100%;
+    }
+
+    /* 深色模式支援 */
+    @media (prefers-color-scheme: dark) {
+        .nav-header.scrolled {
+            background-color: rgba(31, 41, 55, 0.95);
+            border-bottom-color: rgba(75, 85, 99, 0.8);
+        }
+    }
 </style>
 
 <script>
+    // 導航列滾動效果
+    document.addEventListener('DOMContentLoaded', function() {
+        const navHeader = document.querySelector('.nav-header');
+        let lastScrollY = window.scrollY;
+        let ticking = false;
+
+        function updateNavHeader() {
+            const scrollY = window.scrollY;
+
+            if (scrollY > 20) {
+                navHeader.classList.add('scrolled');
+            } else {
+                navHeader.classList.remove('scrolled');
+            }
+
+            lastScrollY = scrollY;
+            ticking = false;
+        }
+
+        function onScroll() {
+            if (!ticking) {
+                window.requestAnimationFrame(updateNavHeader);
+                ticking = true;
+            }
+        }
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+
+        // 初始檢查
+        if (window.scrollY > 20) {
+            navHeader.classList.add('scrolled');
+        }
+    });
+
     // 手機選單切換
     document.addEventListener('DOMContentLoaded', function() {
         const mobileMenuButton = document.querySelector('.mobile-menu-button');
@@ -284,33 +377,76 @@
         const menuIconOpen = document.querySelector('.menu-icon-open');
         const menuIconClose = document.querySelector('.menu-icon-close');
 
+        let touchStartY = 0;
+        let touchEndY = 0;
+
+        function openMenu() {
+            mobileMenu.classList.remove('hidden');
+            if (menuIconOpen) menuIconOpen.classList.add('hidden');
+            if (menuIconClose) menuIconClose.classList.remove('hidden');
+            mobileMenuButton.setAttribute('aria-expanded', 'true');
+            document.body.classList.add('menu-open');
+        }
+
+        function closeMenu() {
+            mobileMenu.classList.add('hidden');
+            if (menuIconOpen) menuIconOpen.classList.remove('hidden');
+            if (menuIconClose) menuIconClose.classList.add('hidden');
+            mobileMenuButton.setAttribute('aria-expanded', 'false');
+            document.body.classList.remove('menu-open');
+        }
+
         if (mobileMenuButton && mobileMenu) {
-            mobileMenuButton.addEventListener('click', function() {
+            mobileMenuButton.addEventListener('click', function(e) {
+                e.stopPropagation();
                 const isHidden = mobileMenu.classList.contains('hidden');
-                
+
                 if (isHidden) {
-                    mobileMenu.classList.remove('hidden');
-                    if (menuIconOpen) menuIconOpen.classList.add('hidden');
-                    if (menuIconClose) menuIconClose.classList.remove('hidden');
-                    mobileMenuButton.setAttribute('aria-expanded', 'true');
+                    openMenu();
                 } else {
-                    mobileMenu.classList.add('hidden');
-                    if (menuIconOpen) menuIconOpen.classList.remove('hidden');
-                    if (menuIconClose) menuIconClose.classList.add('hidden');
-                    mobileMenuButton.setAttribute('aria-expanded', 'false');
+                    closeMenu();
                 }
             });
 
-            // 點擊選單外部關閉選單
+            // 防止在選單內的點擊關閉選單
+            mobileMenu.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+
+            // 處理觸摸事件來區分滑動和點擊
+            document.addEventListener('touchstart', function(e) {
+                touchStartY = e.touches[0].clientY;
+            }, { passive: true });
+
+            document.addEventListener('touchend', function(e) {
+                touchEndY = e.changedTouches[0].clientY;
+                const swipeDistance = Math.abs(touchEndY - touchStartY);
+
+                // 如果滑動距離小於 10px，視為點擊
+                if (swipeDistance < 10) {
+                    if (!mobileMenuButton.contains(e.target) && !mobileMenu.contains(e.target)) {
+                        if (!mobileMenu.classList.contains('hidden')) {
+                            closeMenu();
+                        }
+                    }
+                }
+            }, { passive: true });
+
+            // 點擊選單外部關閉選單（桌面）
             document.addEventListener('click', function(event) {
                 if (!mobileMenuButton.contains(event.target) && !mobileMenu.contains(event.target)) {
                     if (!mobileMenu.classList.contains('hidden')) {
-                        mobileMenu.classList.add('hidden');
-                        if (menuIconOpen) menuIconOpen.classList.remove('hidden');
-                        if (menuIconClose) menuIconClose.classList.add('hidden');
-                        mobileMenuButton.setAttribute('aria-expanded', 'false');
+                        closeMenu();
                     }
                 }
+            });
+
+            // 選單內連結被點擊時關閉選單
+            const menuLinks = mobileMenu.querySelectorAll('a');
+            menuLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    closeMenu();
+                });
             });
         }
     });

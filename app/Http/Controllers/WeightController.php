@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreWeightRequest;
 use App\Http\Requests\UpdateWeightRequest;
 use App\Models\Weight;
+use App\Models\DailyLog;
 use App\Services\AchievementService;
 use App\Services\PointsService;
+use App\Services\DailyTaskService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Cache;
@@ -22,7 +24,8 @@ class WeightController extends Controller
 {
     public function __construct(
         private AchievementService $achievementService,
-        private PointsService $pointsService
+        private PointsService $pointsService,
+        private DailyTaskService $taskService
     ) {
     }
 
@@ -112,6 +115,29 @@ class WeightController extends Controller
         }
 
         $weight = Weight::create($data);
+
+        // 同步更新 daily_logs 表（如果是今天的記錄）
+        if ($recordDate->isToday()) {
+            $dailyLog = $user->dailyLogs()->firstOrNew([
+                'date' => $recordDate,
+            ]);
+
+            $dailyLog->weight = $data['weight'];
+            if (!empty($data['note'])) {
+                $dailyLog->notes = $data['note'];
+            }
+
+            // 計算每日積分
+            $dailyLog->daily_points = $this->taskService->calculateDailyPoints($dailyLog);
+
+            // 如果是週日，計算週任務積分
+            if ($recordDate->dayOfWeek === 0) {
+                $weekStart = $recordDate->copy()->startOfWeek();
+                $dailyLog->weekly_points = $this->taskService->calculateWeeklyPoints($user, $weekStart);
+            }
+
+            $dailyLog->save();
+        }
 
         // 清除相關快取
         $this->clearUserWeightCache($user->id);
