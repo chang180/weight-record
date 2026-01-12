@@ -31,7 +31,8 @@
       "Bash(git stash drop:*)",
       "Bash(git config:*)",
       "Bash(git remote:*)",
-      "Bash(ssh:*)"
+      "Bash(ssh:*)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []
