@@ -32,7 +32,9 @@
       "Bash(git config:*)",
       "Bash(git remote:*)",
       "Bash(ssh:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(npm ci:*)",
+      "Bash(git stash:*)"
     ],
     "deny": [],
     "ask": []
