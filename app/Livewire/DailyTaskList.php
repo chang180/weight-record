@@ -49,13 +49,13 @@ class DailyTaskList extends Component
     public function toggleTask($taskKey): void
     {
         if (!$this->dailyLog) {
-            $this->dispatch('show-error', message: '請先建立今日記錄');
+            $this->dispatch('show-error', message: '請先建立昨日記錄');
             return;
         }
 
         DB::transaction(function () use ($taskKey) {
             $user = Auth::user();
-            
+
             // 重新載入 dailyLog 以確保最新狀態
             $this->dailyLog->refresh();
 
@@ -94,7 +94,7 @@ class DailyTaskList extends Component
 
             // 更新連續達成天數
             $this->updateStreak($user);
-            
+
             // 重新載入用戶以取得最新 streak
             $user->refresh();
             $this->currentStreak = $user->current_streak;
@@ -124,11 +124,11 @@ class DailyTaskList extends Component
 
         DB::transaction(function () {
             $user = Auth::user();
-            $today = Carbon::today();
+            $yesterday = Carbon::yesterday();
 
-            // 取得或建立今日記錄
+            // 取得或建立昨日記錄
             $this->dailyLog = $user->dailyLogs()->firstOrNew([
-                'date' => $today,
+                'date' => $yesterday,
             ]);
 
             // 更新體重和備註
@@ -144,8 +144,8 @@ class DailyTaskList extends Component
             $this->dailyLog->daily_points = $this->dailyPoints;
 
             // 如果是週日，計算週任務積分
-            if ($today->dayOfWeek === 0) {
-                $weekStart = $today->copy()->startOfWeek();
+            if ($yesterday->dayOfWeek === 0) {
+                $weekStart = $yesterday->copy()->startOfWeek();
                 $weeklyPoints = $this->taskService->calculateWeeklyPoints($user, $weekStart);
                 $this->dailyLog->weekly_points = $weeklyPoints;
             }
@@ -171,7 +171,7 @@ class DailyTaskList extends Component
                 }
             }
 
-            // 如果有體重記錄，檢查體重里程碑
+            // 如果有體重記錄,檢查體重里程碑
             if ($this->dailyLog->weight) {
                 $weightAchievements = $this->achievementService->checkWeightMilestones($user);
                 $this->unlockedAchievements = array_merge($this->unlockedAchievements, $weightAchievements);
@@ -182,14 +182,14 @@ class DailyTaskList extends Component
     private function loadTasks(): void
     {
         $user = Auth::user();
-        $today = Carbon::today();
-        $this->isWeekend = $today->isWeekend();
+        $yesterday = Carbon::yesterday();
+        $this->isWeekend = $yesterday->isWeekend();
 
         $this->dailyLog = $user->dailyLogs()
-            ->where('date', $today)
+            ->where('date', $yesterday)
             ->first();
 
-        $tasksList = $this->taskService->getTodayTasks($today);
+        $tasksList = $this->taskService->getTodayTasks($yesterday);
 
         // 轉換任務格式並加入完成狀態
         $this->tasks = [];
@@ -202,6 +202,12 @@ class DailyTaskList extends Component
             ];
         }
 
+        // 載入已有的體重和備註
+        if ($this->dailyLog) {
+            $this->weight = $this->dailyLog->weight ?? '';
+            $this->notes = $this->dailyLog->notes ?? '';
+        }
+
         $this->dailyPoints = $this->dailyLog->daily_points ?? 0;
         $this->availablePoints = $user->available_points;
         $this->currentStreak = $user->current_streak;
@@ -211,7 +217,7 @@ class DailyTaskList extends Component
     private function updateStreak($user): void
     {
         $streak = 0;
-        $date = Carbon::today();
+        $date = Carbon::yesterday();
 
         while (true) {
             $log = $user->dailyLogs()

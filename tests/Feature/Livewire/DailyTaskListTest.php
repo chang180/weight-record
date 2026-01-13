@@ -35,13 +35,13 @@ class DailyTaskListTest extends TestCase
     public function test_displays_tasks_for_weekday(): void
     {
         $user = User::factory()->create();
-        
-        // 設定為工作日（週一）
-        Carbon::setTestNow(Carbon::create(2024, 1, 1)); // 週一
+
+        // 設定為週二,這樣昨天(週一)是工作日
+        Carbon::setTestNow(Carbon::create(2024, 1, 2)); // 週二
 
         Livewire::actingAs($user)
             ->test(DailyTaskList::class)
-            ->assertSee('工作日任務')
+            ->assertSee('昨日工作日任務')
             ->assertSee('只吃晚餐')
             ->assertSee('早點睡');
     }
@@ -49,13 +49,13 @@ class DailyTaskListTest extends TestCase
     public function test_displays_tasks_for_weekend(): void
     {
         $user = User::factory()->create();
-        
-        // 設定為週末（週六）
-        Carbon::setTestNow(Carbon::create(2024, 1, 6)); // 週六
+
+        // 設定為週日,這樣昨天(週六)是週末
+        Carbon::setTestNow(Carbon::create(2024, 1, 7)); // 週日
 
         Livewire::actingAs($user)
             ->test(DailyTaskList::class)
-            ->assertSee('週末任務')
+            ->assertSee('昨日週末任務')
             ->assertSee('只吃 2 餐')
             ->assertDontSee('早點睡');
     }
@@ -66,7 +66,7 @@ class DailyTaskListTest extends TestCase
 
         Livewire::actingAs($user)
             ->test(DailyTaskList::class)
-            ->assertSee('請先建立今日記錄');
+            ->assertSee('請先建立昨日記錄');
     }
 
     public function test_user_can_create_daily_log_with_weight(): void
@@ -81,9 +81,9 @@ class DailyTaskListTest extends TestCase
             ->assertHasNoErrors();
 
         $dailyLog = \App\Models\DailyLog::where('user_id', $user->id)
-            ->whereDate('date', Carbon::today())
+            ->whereDate('date', Carbon::yesterday())
             ->first();
-        
+
         $this->assertNotNull($dailyLog);
         $this->assertEquals(75.0, $dailyLog->weight);
         $this->assertEquals('測試備註', $dailyLog->notes);
@@ -94,7 +94,7 @@ class DailyTaskListTest extends TestCase
         $user = User::factory()->create();
         $dailyLog = DailyLog::factory()->create([
             'user_id' => $user->id,
-            'date' => Carbon::today(),
+            'date' => Carbon::yesterday(),
             'task_meal' => false,
         ]);
 
@@ -113,10 +113,10 @@ class DailyTaskListTest extends TestCase
             'total_points' => 0,
             'available_points' => 0,
         ]);
-        
+
         $dailyLog = DailyLog::factory()->create([
             'user_id' => $user->id,
-            'date' => Carbon::today(),
+            'date' => Carbon::yesterday(),
             'task_meal' => false,
             'task_walk' => false,
             'task_no_snack' => false,
@@ -130,7 +130,7 @@ class DailyTaskListTest extends TestCase
 
         $dailyLog->refresh();
         $this->assertEquals(10, $dailyLog->daily_points);
-        
+
         $user->refresh();
         $this->assertEquals(10, $user->available_points);
     }
@@ -141,10 +141,10 @@ class DailyTaskListTest extends TestCase
             'total_points' => 50,
             'available_points' => 50,
         ]);
-        
+
         $dailyLog = DailyLog::factory()->create([
             'user_id' => $user->id,
-            'date' => Carbon::today(),
+            'date' => Carbon::yesterday(),
             'task_meal' => true,
             'task_walk' => true,
             'task_no_snack' => true,
@@ -168,7 +168,7 @@ class DailyTaskListTest extends TestCase
         $user = User::factory()->create();
         $dailyLog = DailyLog::factory()->create([
             'user_id' => $user->id,
-            'date' => Carbon::today(),
+            'date' => Carbon::yesterday(),
             'task_meal' => true,
             'task_walk' => true,
             'task_no_snack' => false,
@@ -187,7 +187,7 @@ class DailyTaskListTest extends TestCase
         $user = User::factory()->create();
         $dailyLog = DailyLog::factory()->create([
             'user_id' => $user->id,
-            'date' => Carbon::today(),
+            'date' => Carbon::yesterday(),
             'task_meal' => true,
             'task_walk' => true,
             'task_no_snack' => true,
@@ -202,10 +202,10 @@ class DailyTaskListTest extends TestCase
     public function test_achievement_unlocked_when_all_tasks_completed(): void
     {
         $user = User::factory()->create();
-        
+
         $dailyLog = DailyLog::factory()->create([
             'user_id' => $user->id,
-            'date' => Carbon::today(),
+            'date' => Carbon::yesterday(),
             'task_meal' => true,
             'task_walk' => true,
             'task_no_snack' => true,
@@ -237,13 +237,13 @@ class DailyTaskListTest extends TestCase
             'current_streak' => 0,
         ]);
 
-        // 確保測試在工作日進行（週一到週五）
-        Carbon::setTestNow(Carbon::parse('2024-01-08')); // 2024-01-08 是週一
+        // 設定為週二,這樣昨天是週一(工作日)
+        Carbon::setTestNow(Carbon::parse('2024-01-09')); // 2024-01-09 是週二
 
-        // 創建昨天（週日，週末）的完美記錄
+        // 創建前天（週日,週末）的完美記錄
         DailyLog::factory()->create([
             'user_id' => $user->id,
-            'date' => Carbon::yesterday(), // 週日
+            'date' => Carbon::yesterday()->subDay(), // 週日
             'task_meal' => true,
             'task_walk' => true,
             'task_no_snack' => true,
@@ -251,10 +251,10 @@ class DailyTaskListTest extends TestCase
             'task_no_sugar' => true, // 週日任務
         ]);
 
-        // 創建今天（週一，工作日）的記錄
+        // 創建昨天（週一,工作日）的記錄 - 這是我們要操作的對象
         $dailyLog = DailyLog::factory()->create([
             'user_id' => $user->id,
-            'date' => Carbon::today(), // 週一
+            'date' => Carbon::yesterday(), // 週一
             'task_meal' => true,
             'task_walk' => true,
             'task_no_snack' => true,
@@ -266,7 +266,7 @@ class DailyTaskListTest extends TestCase
             ->call('toggleTask', 'task_sleep');
 
         $user->refresh();
-        $this->assertEquals(2, $user->current_streak); // 昨天 + 今天
+        $this->assertEquals(2, $user->current_streak); // 週日 + 週一
 
         // 恢復時間
         Carbon::setTestNow();
@@ -289,7 +289,7 @@ class DailyTaskListTest extends TestCase
         $user = User::factory()->create();
         $dailyLog = DailyLog::factory()->create([
             'user_id' => $user->id,
-            'date' => Carbon::today(),
+            'date' => Carbon::yesterday(),
             'task_meal' => false,
         ]);
 

@@ -88,40 +88,41 @@
                 <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-4 text-white transition-all duration-300 hover:shadow-xl">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-purple-100 text-xs">可用積分</p>
-                            <p class="text-2xl font-bold transition-all duration-300" 
+                            <p class="text-white text-xs font-semibold" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);">可用積分</p>
+                            <p class="text-2xl font-bold text-white transition-all duration-300"
+                               style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);"
                                x-data="{ points: {{ auth()->user()->available_points }} }"
                                x-text="points">{{ auth()->user()->available_points }}</p>
                         </div>
                         <div class="text-3xl transition-transform duration-300 hover:rotate-12">💎</div>
                     </div>
-                    <a href="{{ route('daily-logs.index') }}" class="text-purple-100 text-xs hover:text-white mt-2 block transition-colors">
-                        前往今日任務 →
+                    <a href="{{ route('daily-logs.index') }}" class="text-white text-xs hover:text-purple-100 mt-2 block transition-colors font-medium">
+                        前往昨日任務 →
                     </a>
                 </div>
 
-                <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg p-4 text-white">
+                <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg p-4 text-white transition-all duration-300 hover:shadow-xl">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-orange-100 text-xs">當前連續</p>
-                            <p class="text-2xl font-bold">{{ auth()->user()->current_streak }} 天</p>
+                            <p class="text-white text-xs font-semibold" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);">當前連續</p>
+                            <p class="text-2xl font-bold text-white" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);">{{ auth()->user()->current_streak }} 天</p>
                         </div>
-                        <div class="text-3xl">🔥</div>
+                        <div class="text-3xl transition-transform duration-300 hover:scale-110">🔥</div>
                     </div>
-                    <a href="{{ route('achievements.index') }}" class="text-orange-100 text-xs hover:text-white mt-2 block">
+                    <a href="{{ route('achievements.index') }}" class="text-white text-xs hover:text-orange-100 mt-2 block transition-colors font-medium">
                         查看成就 →
                     </a>
                 </div>
 
-                <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-4 text-white">
+                <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-4 text-white transition-all duration-300 hover:shadow-xl">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-green-100 text-xs">可兌換獎勵</p>
-                            <p class="text-2xl font-bold">5 種</p>
+                            <p class="text-white text-xs font-semibold" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);">可兌換獎勵</p>
+                            <p class="text-2xl font-bold text-white" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);">5 種</p>
                         </div>
-                        <div class="text-3xl">🎁</div>
+                        <div class="text-3xl transition-transform duration-300 hover:scale-110">🎁</div>
                     </div>
-                    <a href="{{ route('rewards.index') }}" class="text-green-100 text-xs hover:text-white mt-2 block">
+                    <a href="{{ route('rewards.index') }}" class="text-white text-xs hover:text-green-100 mt-2 block transition-colors font-medium">
                         前往商店 →
                     </a>
                 </div>

@@ -24,6 +24,7 @@ class WeightRecordForm extends Component
     public $pointsToDeduct = null;
     public $pointsDebt = null;
     public $unlockedAchievements = [];
+    public $showTaskReminder = false;
     
     protected AchievementService $achievementService;
     protected PointsService $pointsService;
@@ -130,6 +131,7 @@ class WeightRecordForm extends Component
         $this->pointsToDeduct = null;
         $this->pointsDebt = null;
         $this->unlockedAchievements = [];
+        $this->showTaskReminder = false;
 
         // 步驟 1：檢查未記錄天數並扣除積分
         $lastWeight = $user->weights()
@@ -173,6 +175,9 @@ class WeightRecordForm extends Component
         // 步驟 4：檢查記錄體重成就
         $recordingAchievements = $this->achievementService->checkWeightRecordingAchievements($user);
         $this->unlockedAchievements = array_merge($weightAchievements, $recordingAchievements);
+
+        // 顯示任務提醒
+        $this->showTaskReminder = true;
 
         // 重置表單
         $this->weight = '';

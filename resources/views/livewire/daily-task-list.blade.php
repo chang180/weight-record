@@ -41,12 +41,12 @@
         </div>
     </div>
 
-    <!-- 今日任務清單 -->
+    <!-- 昨日任務清單 -->
     <div class="bg-white shadow-lg rounded-xl overflow-hidden mb-6 border border-gray-200">
         <div class="px-6 py-4 bg-gradient-to-r from-indigo-500 to-indigo-600">
             <h3 class="text-lg font-bold text-white">
-                {{ $isWeekend ? '🎉 週末任務' : '💼 工作日任務' }}
-                <span class="text-indigo-100 text-sm ml-2">{{ now()->format('Y-m-d') }}</span>
+                {{ $isWeekend ? '🎉 昨日週末任務' : '💼 昨日工作日任務' }}
+                <span class="text-indigo-100 text-sm ml-2">{{ now()->subDay()->format('Y-m-d') }}</span>
             </h3>
             <div class="mt-2">
                 <div class="flex justify-between text-xs text-indigo-100 mb-1">
@@ -65,9 +65,9 @@
                     <div class="flex items-start">
                         <div class="flex-shrink-0 text-2xl mr-3">⚠️</div>
                         <div class="flex-1">
-                            <p class="text-yellow-800 font-semibold mb-1">請先建立今日記錄</p>
+                            <p class="text-yellow-800 font-semibold mb-1">請先建立昨日記錄</p>
                             <p class="text-yellow-700 text-sm">
-                                請先在下方的「今日體重記錄」區域建立記錄，然後就可以開始完成任務了！
+                                請先在下方的「昨日體重記錄」區域建立記錄，然後就可以勾選昨天完成的任務了！
                             </p>
                         </div>
                     </div>
@@ -77,9 +77,9 @@
                     <div class="flex items-start">
                         <div class="flex-shrink-0 text-2xl mr-3">💡</div>
                         <div class="flex-1">
-                            <p class="text-blue-800 font-semibold mb-1">如何完成任務</p>
+                            <p class="text-blue-800 font-semibold mb-1">如何勾選昨日任務</p>
                             <p class="text-blue-700 text-sm">
-                                點擊下方的任務項目即可切換完成狀態。完成的任務會變成綠色並顯示 ✓ 標記。
+                                點擊下方的任務項目即可勾選昨天已完成的任務。完成的任務會變成綠色並顯示 ✓ 標記。
                             </p>
                         </div>
                     </div>
@@ -138,23 +138,39 @@
                 @endforeach
                 
                 @if($this->allCompleted)
-                    <div 
+                    <div
                         x-data="{ show: true }"
                         x-show="show"
                         x-transition:enter="transition ease-out duration-500"
                         x-transition:enter-start="opacity-0 transform scale-90"
                         x-transition:enter-end="opacity-100 transform scale-100"
                         class="mt-4 p-4 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg text-white text-center">
-                        <div class="text-2xl mb-2">✨ 完美一天！</div>
-                        <div class="text-sm">所有任務都完成了！</div>
+                        <div class="text-2xl mb-2">✨ 完美的一天！</div>
+                        <div class="text-sm">昨天所有任務都完成了！</div>
                     </div>
                 @endif
             </div>
 
             <!-- 體重記錄表單 -->
             <div class="mt-6 pt-6 border-t border-gray-200">
-                <h4 class="font-semibold text-gray-800 mb-4">📊 今日體重記錄</h4>
+                <div class="mb-4">
+                    <h4 class="font-semibold text-gray-800 mb-2">📊 昨日體重記錄</h4>
+                    <p class="text-sm text-gray-600">
+                        記錄昨天的體重，同時勾選昨天完成的任務。這樣可以更準確地反映實際完成情況。
+                    </p>
+                </div>
                 <form wire:submit="storeWeightRecord" class="space-y-4">
+                    @if($dailyLog && $dailyLog->weight)
+                        <div class="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <p class="text-sm text-blue-800">
+                                <span class="font-semibold">已有記錄：</span>
+                                體重 {{ $dailyLog->weight }} kg
+                                @if($dailyLog->notes)
+                                    | 備註：{{ $dailyLog->notes }}
+                                @endif
+                            </p>
+                        </div>
+                    @endif
                     <div>
                         <label for="weight" class="block text-sm font-semibold text-gray-700 mb-2">體重 (kg)</label>
                         <input
@@ -163,7 +179,6 @@
                             step="0.1"
                             min="0"
                             wire:model="weight"
-                            value="{{ $dailyLog?->weight }}"
                             class="w-full px-4 py-2 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none @error('weight') border-red-500 @else border-gray-300 @enderror"
                             placeholder="例如：68.5" />
                         @error('weight')
@@ -171,13 +186,13 @@
                         @enderror
                     </div>
                     <div>
-                        <label for="note" class="block text-sm font-semibold text-gray-700 mb-2">備註</label>
+                        <label for="notes" class="block text-sm font-semibold text-gray-700 mb-2">備註</label>
                         <textarea
                             id="notes"
                             rows="2"
                             wire:model="notes"
                             class="w-full px-4 py-2 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none @error('notes') border-red-500 @else border-gray-300 @enderror"
-                            placeholder="可選：記錄當天的飲食、運動或其他情況">{{ $dailyLog?->notes }}</textarea>
+                            placeholder="可選：記錄當天的飲食、運動或其他情況"></textarea>
                         @error('notes')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror

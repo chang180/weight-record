@@ -62,7 +62,7 @@
     @endif
 
     @if(count($unlockedAchievements) > 0)
-        <div x-data="{ show: true }" 
+        <div x-data="{ show: true }"
              x-show="show"
              x-transition:enter="transition ease-out duration-500"
              x-transition:enter-start="opacity-0 transform translate-y-[-100px] scale-90"
@@ -81,6 +81,38 @@
                     </p>
                 </div>
                 <button @click="show = false" class="text-white hover:text-yellow-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    @endif
+
+    @if($showTaskReminder)
+        <div x-data="{ show: true }"
+             x-show="show"
+             x-transition:enter="transition ease-out duration-500"
+             x-transition:enter-start="opacity-0 transform translate-y-[-100px] scale-90"
+             x-transition:enter-end="opacity-100 transform translate-y-0 scale-100"
+             x-transition:leave="transition ease-in duration-300"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @click.away="setTimeout(() => show = false, 8000)"
+             class="mb-4 bg-gradient-to-r from-blue-500 to-indigo-600 border-2 border-blue-300 rounded-lg p-4 shadow-lg">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 text-4xl">✅</div>
+                <div class="ml-4 flex-1">
+                    <p class="text-lg font-bold text-white">記錄成功！</p>
+                    <p class="text-sm text-blue-100 mb-2">
+                        別忘了勾選昨天完成的任務，獲取更多積分！
+                    </p>
+                    <a href="{{ route('daily-logs.index') }}"
+                       class="inline-flex items-center px-4 py-2 bg-white text-indigo-600 font-semibold text-sm rounded-lg hover:bg-blue-50 transition duration-300">
+                        前往任務頁面 →
+                    </a>
+                </div>
+                <button @click="show = false; $wire.showTaskReminder = false" class="text-white hover:text-blue-200">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
