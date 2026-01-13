@@ -15,3 +15,6 @@ yarn-error.log
 /storage/framework/cache/*
 /storage/framework/sessions/*
 /storage/framework/views/*
+
+# Claude Code 本地設定
+.claude/settings.local.json
