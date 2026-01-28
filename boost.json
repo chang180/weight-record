@@ -3,11 +3,14 @@
         "claude_code",
         "cursor"
     ],
-    "editors": [
-        "claude_code",
-        "cursor",
-        "vscode"
-    ],
-    "guidelines": [],
-    "herd_mcp": true
+    "guidelines": true,
+    "herd_mcp": true,
+    "mcp": true,
+    "sail": false,
+    "skills": [
+        "livewire-development",
+        "pest-testing",
+        "tailwindcss-development",
+        "laravel-11-12-app-guidelines"
+    ]
 }
